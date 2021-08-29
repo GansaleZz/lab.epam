@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group 'com.epam'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.26'
+    implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.9'
+    implementation group: 'org.springframework', name: 'spring-context', version: '5.3.9'
+    implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.9'
+    implementation group: 'org.springframework', name: 'spring-web', version: '5.3.9'
+    implementation group: 'org.springframework', name: 'spring-core', version: '5.3.9'
+    implementation group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.12.RELEASE'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.4'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testImplementation group: 'org.springframework', name: 'spring-test', version: '5.3.9'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
