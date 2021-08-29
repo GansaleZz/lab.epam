@@ -1,4 +1,4 @@
-package com.epam.esm.persistence.dao;
+package com.epam.esm.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,11 +7,11 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class TagDao {
+public class TagDto {
     private Long id;
     private String name;
 }

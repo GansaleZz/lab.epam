@@ -1,67 +1,156 @@
 package com.epam.esm.persistence.jdbc;
 
-import com.epam.esm.model.domain.Property;
-import com.epam.esm.model.dto.TagDto;
-import com.epam.esm.web.config.SpringConfig;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import com.epam.esm.TestConfig;
+import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDaoImpl;
+import com.epam.esm.util.validation.BeforeTagValidation;
+import com.epam.esm.web.exception.EntityBadInputException;
+import com.epam.esm.web.exception.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { TestConfig.class }, loader = AnnotationConfigContextLoader.class)
+@Sql({"classpath:sql/db-schema.sql", "classpath:sql/db-test-data.sql"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class JdbcTemplateTagDaoImplTest {
-    private JdbcTemplateTagDaoImpl jdbcTemplateTagDao;
 
-    public JdbcTemplateTagDaoImplTest(){
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        Property property = Property.getInstance();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUsername(property.getUSER());
-        dataSource.setPassword(property.getPASSWORD());
-        dataSource.setUrl(property.getURL()+property.getSCHEME());
+    private final JdbcTemplateTagDaoImpl jdbcTemplateTagDao;
 
-        jdbcTemplateTagDao = new JdbcTemplateTagDaoImpl();
-        jdbcTemplateTagDao.setDataSource(dataSource);
+    @Autowired
+    public JdbcTemplateTagDaoImplTest(JdbcTemplate jdbcTemplate,
+                                      BeforeTagValidation<TagDao, Long> tagValidation) {
+        this.jdbcTemplateTagDao = new JdbcTemplateTagDaoImpl(jdbcTemplate, tagValidation);
     }
 
-    @Order(1)
     @Test
-    void findAllEntities() {
-        assertEquals(1, jdbcTemplateTagDao.findAllEntities().size());
+    void findAllTags() {
+        try {
+            int sizeAfterInit = 6;
+
+            List<TagDao> listResult = jdbcTemplateTagDao.findAllEntities();
+
+            assertEquals(sizeAfterInit, listResult.size());
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
     }
 
-    @Order(2)
     @Test
-    void findEntityById() {
-        assertFalse(jdbcTemplateTagDao.findEntityById(133).isPresent());
-        System.out.println(jdbcTemplateTagDao.findEntityById(133));
+    void findTagByIdExists() {
+        try {
+            Long id = 1L;
+
+            Optional<TagDao> tagDao = jdbcTemplateTagDao.findEntityById(id);
+
+            assertTrue(tagDao.isPresent());
+            assertEquals(id, tagDao.get().getId());
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
     }
 
-    @Order(3)
     @Test
-    void create() {
-        TagDto tag = TagDto.builder().build();
-        tag.setName("Hi");
-        assertTrue(jdbcTemplateTagDao.create(tag));
+    void findTagByIdFailNotFound() {
+        try {
+            Long badId = 150L;
+
+            assertThrows(EntityNotFoundException.class,() -> jdbcTemplateTagDao.findEntityById(badId));
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
     }
 
-    @Order(4)
     @Test
-    void findTagByName(){
-        assertTrue(jdbcTemplateTagDao.findTagByName("Hi").isPresent());
+    void findTagByNameExists() {
+        try {
+            String name = "TAG_TEST_2";
+
+            Optional<TagDao> tagDao = jdbcTemplateTagDao.findTagByName(name);
+
+            assertTrue(tagDao.isPresent());
+            assertEquals(name, tagDao.get().getName());
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
     }
 
-    @Order(5)
     @Test
-    void delete() {
-        int id = jdbcTemplateTagDao.findAllEntities().get(jdbcTemplateTagDao.findAllEntities().size()-1).getId();
-        assertTrue(jdbcTemplateTagDao.delete(id));
+    void findTagByNameFailNotFound() {
+        try {
+            String name = "Random name of tag";
+
+            assertThrows(EntityNotFoundException.class, () -> jdbcTemplateTagDao.findTagByName(name));
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
+    }
+
+    @Test
+    void createSuccess() {
+        try {
+            TagDao tagDao = TagDao.builder()
+                    .name("Tag__")
+                    .build();
+
+            TagDao tagDaoResult = jdbcTemplateTagDao.create(tagDao);
+
+            assertEquals(7, jdbcTemplateTagDao.findAllEntities().size());
+            assertTrue(jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).isPresent());
+            assertEquals(tagDao.getName(), jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).get().getName());
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
+    }
+
+    @Test
+    void createFailBadInput() {
+        try {
+            assertThrows(EntityBadInputException.class, () -> jdbcTemplateTagDao.create(new TagDao()));
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
+    }
+
+    @Test
+    void deleteSuccess() {
+        try {
+            Long id = 1L;
+            int sizeAfterInit = jdbcTemplateTagDao.findAllEntities().size();
+
+            boolean result = jdbcTemplateTagDao.delete(id);
+
+            assertTrue(result);
+            assertEquals(sizeAfterInit-1, jdbcTemplateTagDao.findAllEntities().size());
+            assertThrows(EntityNotFoundException.class, () -> jdbcTemplateTagDao.findEntityById(id));
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
+    }
+
+    @Test
+    void deleteFailNotFound() {
+        try {
+            Long id = 1124L;
+
+            assertThrows(EntityNotFoundException.class, () -> jdbcTemplateTagDao.delete(id));
+        } catch (Exception e) {
+            fail("Unexpected exception", e);
+        }
     }
 }
