@@ -1,19 +1,19 @@
 package com.epam.esm.persistence.jdbc;
 
 import com.epam.esm.TestConfig;
-import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.dao.GiftCertificate;
+import com.epam.esm.persistence.jdbc.gift.GiftDao;
 import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
-import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDaoImpl;
+import com.epam.esm.persistence.util.mapper.GiftMapperDB;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
-import com.epam.esm.util.validation.BeforeGiftValidation;
+import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -23,222 +23,168 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { TestConfig.class }, loader = AnnotationConfigContextLoader.class)
-@Sql({"classpath:sql/db-schema.sql", "classpath:sql/db-test-data.sql"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = "classpath:sql/db-init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:sql/db-clean.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class JdbcTemplateGiftDaoImplTest {
 
-    private final JdbcTemplateGiftDao jdbcTemplateGiftDao;
+    private final GiftDao jdbcTemplateGiftDao;
 
     @Autowired
     public JdbcTemplateGiftDaoImplTest(JdbcTemplate jdbcTemplate,
-                                   BeforeGiftValidation<GiftCertificateDao, Long> giftValidation) {
-        jdbcTemplateGiftDao = new JdbcTemplateGiftDaoImpl(jdbcTemplate, giftValidation);
+                                       BaseGiftValidator<GiftCertificate, Long> giftValidation,
+                                       GiftMapperDB giftMapperDB) {
+        jdbcTemplateGiftDao = new JdbcTemplateGiftDao(jdbcTemplate, giftValidation, giftMapperDB);
     }
 
     @Test
     void findAllGiftsWithoutSearchFilterParams() {
-        try {
-            int sizeAfterInit = 4;
+        int sizeAfterInit = 4;
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter());
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter());
 
-            assertEquals(sizeAfterInit, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(sizeAfterInit, listResult.size());
     }
 
     @Test
     void findAllGiftsWithTagNotExists() {
-        try {
-            String tagName = "Hey hey hey, Test!";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
+        String tagName = "Hey hey hey, Test!";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(0, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(0, listResult.size());
     }
 
     @Test
     void findAllGiftsWithTagExists() {
-        try {
-            String tagName = "TAG_TEST_1";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
+        String tagName = "TAG_TEST_1";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(1, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(1, listResult.size());
     }
 
     @Test
     void findAllGiftsByNamePartExists() {
-        try {
-            String namePart1 = "TEST";
-            String namePart2 = "2";
-            GiftSearchFilter giftSearchFilter1 = GiftSearchFilter.builder()
-                    .giftName(namePart1)
-                    .build();
-            GiftSearchFilter giftSearchFilter2 = GiftSearchFilter.builder()
-                    .giftName(namePart2)
-                    .build();
+        String namePart = "TEST";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftName(namePart)
+                .build();
 
-            List<GiftCertificateDao> listFirstResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter1);
-            List<GiftCertificateDao> listSecondResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter2);
+        List<GiftCertificate> listFirstResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(4, listFirstResult.size());
-            listFirstResult.forEach(giftCertificateDao ->  assertTrue(giftCertificateDao.getName().contains(namePart1)));
-            assertEquals(1, listSecondResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(4, listFirstResult.size());
+        listFirstResult.forEach(giftCertificateDao ->  assertTrue(giftCertificateDao.getName().contains(namePart)));
     }
 
     @Test
     void findAllGiftsByNamePartNotExists() {
-        try {
-            String namePart = "test";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftName(namePart)
-                    .build();
+        String namePart = "test";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftName(namePart)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(0, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(0, listResult.size());
     }
 
     @Test
     void findAllGiftsByDescriptionPartExists() {
-        try {
-            String descriptionPart = "_3";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftDescription(descriptionPart)
-                    .build();
+        String descriptionPart = "_3";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftDescription(descriptionPart)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(1, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(1, listResult.size());
     }
 
     @Test
     void findAllGiftsByNameDescriptionNotExists() {
-        try {
-            String descriptionPart = "_3!!";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftDescription(descriptionPart)
-                    .build();
+        String descriptionPart = "_3!!";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftDescription(descriptionPart)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(0, listResult.size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(0, listResult.size());
     }
 
     @Test
     void findAllGiftsByNameAscOrder() {
-        try {
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftsByNameOrder(QueryOrder.ASC)
-                    .build();
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftsByNameOrder(QueryOrder.ASC)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals("TEST1",listResult.get(0).getName());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals("TEST1",listResult.get(0).getName());
     }
 
     @Test
     void findAllGiftsByDateDescOrder() {
-        try {
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftsByNameOrder(QueryOrder.DESC)
-                    .build();
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftsByNameOrder(QueryOrder.DESC)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals("TEST1",listResult.get(listResult.size()-1 ).getName());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals("TEST1",listResult.get(listResult.size()-1 ).getName());
     }
 
     @Test
     void findAllGiftsWithAllParamsExists() {
-        try {
-            String tagName = "TAG_TEST_2";
-            String namePart = "TEST";
-            String descriptionPart = "_";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftName(namePart)
-                    .tag(tagName)
-                    .giftDescription(descriptionPart)
-                    .giftsByNameOrder(QueryOrder.ASC)
-                    .giftsByDateOrder(QueryOrder.DESC)
-                    .build();
+        String tagName = "TAG_TEST_2";
+        String namePart = "TEST";
+        String descriptionPart = "_";
+        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+                .giftName(namePart)
+                .tag(tagName)
+                .giftDescription(descriptionPart)
+                .giftsByNameOrder(QueryOrder.ASC)
+                .giftsByDateOrder(QueryOrder.DESC)
+                .build();
 
-            List<GiftCertificateDao> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
+        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 
-            assertEquals(2, listResult.size());
-            listResult.forEach(giftCertificateDao ->
+        assertEquals(2, listResult.size());
+        listResult.forEach(giftCertificateDao ->
                 assertEquals(tagName, giftCertificateDao.getTags().get(0).getName())
-            );
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        );
     }
 
 
     @Test
     void findGiftByIdExists() {
-        try {
-            Long id = 1L;
+        Long id = 1L;
 
-            Optional<GiftCertificateDao> giftCertificateDao = jdbcTemplateGiftDao.findEntityById(id);
+        Optional<GiftCertificate> giftCertificateDao = jdbcTemplateGiftDao.findEntityById(id);
 
-            assertTrue(giftCertificateDao.isPresent());
-            assertEquals(id, giftCertificateDao.get().getId());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertTrue(giftCertificateDao.isPresent());
+        assertEquals(id, giftCertificateDao.get().getId());
     }
 
     @Test
     void findGiftByIdFailNotFound() {
-        try {
             Long badId = 150L;
 
-            assertThrows(EntityNotFoundException.class,() -> jdbcTemplateGiftDao.findEntityById(badId));
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+            assertEquals(Optional.empty(), jdbcTemplateGiftDao.findEntityById(badId));
     }
 
     @Test
     void createSuccess() {
-        try {
-            GiftCertificateDao giftCertificateDao = GiftCertificateDao
+            GiftCertificate giftCertificateDao = GiftCertificate
                     .builder()
                     .name("Simple test")
                     .description("Only for test")
@@ -246,83 +192,62 @@ class JdbcTemplateGiftDaoImplTest {
                     .price(1.0)
                     .build();
 
-            Long id = jdbcTemplateGiftDao.create(giftCertificateDao).getId();
+            GiftCertificate giftCertificate = jdbcTemplateGiftDao.create(giftCertificateDao);
+            giftCertificateDao.setCreateDate(giftCertificate.getCreateDate().toLocalDate().atStartOfDay());
+            giftCertificateDao.setLastUpdateDate(giftCertificate.getLastUpdateDate().toLocalDate().atStartOfDay());
 
-            assertEquals(giftCertificateDao, jdbcTemplateGiftDao.findEntityById(id).get());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+            assertEquals(giftCertificateDao, jdbcTemplateGiftDao.findEntityById(giftCertificate.getId()).get());
     }
 
     @Test
     void createFailBadInput() {
-        try {
-            GiftCertificateDao giftCertificateDao = GiftCertificateDao.builder()
-                    .name("Hey Hey")
-                    .build();
+        GiftCertificate giftCertificateDao = GiftCertificate.builder()
+                .name("Hey Hey")
+                .build();
 
-            assertThrows(EntityBadInputException.class, () -> jdbcTemplateGiftDao.create(giftCertificateDao));
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertThrows(EntityBadInputException.class, () -> jdbcTemplateGiftDao.create(giftCertificateDao));
     }
 
     @Test
     void updateSuccess() {
-        try {
-            GiftCertificateDao giftCertificateDao = GiftCertificateDao.builder()
-                    .id(1L)
-                    .name("Updated name for test")
-                    .build();
+        GiftCertificate giftCertificateDao = GiftCertificate.builder()
+                .id(1L)
+                .name("Updated name for test")
+                .build();
 
-            jdbcTemplateGiftDao.update(giftCertificateDao);
+        jdbcTemplateGiftDao.update(giftCertificateDao);
 
-            assertEquals(giftCertificateDao.getName(), jdbcTemplateGiftDao
-                    .findEntityById(giftCertificateDao.getId())
-                    .get()
-                    .getName());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertEquals(giftCertificateDao.getName(), jdbcTemplateGiftDao
+                .findEntityById(giftCertificateDao.getId())
+                .get()
+                .getName());
     }
 
     @Test
     void updateFailNotFound() {
-        try {
-            GiftCertificateDao giftCertificateDao = GiftCertificateDao.builder()
-                    .id(5L)
-                    .name("Updated name for test")
-                    .build();
+        GiftCertificate giftCertificateDao = GiftCertificate.builder()
+                .id(5L)
+                .name("Updated name for test")
+                .build();
 
-            assertThrows(EntityNotFoundException.class, () -> jdbcTemplateGiftDao.update(giftCertificateDao));
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertThrows(EntityNotFoundException.class, () -> jdbcTemplateGiftDao.update(giftCertificateDao));
     }
 
     @Test
     void deleteSuccess() {
-        try {
-            Long id = 1L;
-            int sizeBefore = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size();
+        Long id = 1L;
+        int sizeBefore = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size();
 
-            boolean res = jdbcTemplateGiftDao.delete(id);
+        boolean res = jdbcTemplateGiftDao.delete(id);
 
-            assertTrue(res);
-            assertEquals(sizeBefore-1, jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertTrue(res);
+        assertEquals(sizeBefore-1, jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size());
     }
 
     @Test
     void deleteFailNotFound() {
-        try {
-            Long id = 15175515L;
+        Long id = 15175515L;
 
-            assertThrows(EntityNotFoundException.class, () -> jdbcTemplateGiftDao.delete(id));
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
+        assertFalse(jdbcTemplateGiftDao.delete(id));
     }
 }

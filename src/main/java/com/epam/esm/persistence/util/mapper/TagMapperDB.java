@@ -1,12 +1,14 @@
 package com.epam.esm.persistence.util.mapper;
 
-import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.Tag;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TagMapper implements RowMapper<TagDao> {
+@Component
+public class TagMapperDB implements RowMapper<Tag> {
 
     /**
      * Implementation, which extract result set of all values of tag tables columns
@@ -14,8 +16,8 @@ public class TagMapper implements RowMapper<TagDao> {
      * @return list of initialized tags
      */
     @Override
-    public TagDao mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return TagDao.builder()
+    public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return Tag.builder()
                 .id(rs.getLong("tag_id"))
                 .name(rs.getString("name"))
                 .build();

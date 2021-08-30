@@ -1,6 +1,5 @@
 package com.epam.esm.web.config;
 
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -8,9 +7,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 
     @Override
     protected WebApplicationContext createServletApplicationContext() {
-        WebApplicationContext context = super.createServletApplicationContext();
-        ((ConfigurableEnvironment)context.getEnvironment()).setActiveProfiles("prod");
-        return context;
+        return super.createServletApplicationContext();
     }
 
     @Override

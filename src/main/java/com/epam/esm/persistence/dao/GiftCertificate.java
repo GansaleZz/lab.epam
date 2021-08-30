@@ -1,4 +1,4 @@
-package com.epam.esm.service.dto;
+package com.epam.esm.persistence.dao;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,21 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class GiftCertificateDto {
+public class GiftCertificate {
     private Long id;
     private String name;
     private String description;
-    private Double price;
-    private Integer duration;
+    @Builder.Default
+    private Double price = 0.0;
+    @Builder.Default
+    private Integer duration = 0;
     private LocalDateTime createDate;
     private LocalDateTime lastUpdateDate;
     @Builder.Default
-    private List<TagDto> tags = new LinkedList<>();
+    private List<Tag> tags = new ArrayList<>();
 }

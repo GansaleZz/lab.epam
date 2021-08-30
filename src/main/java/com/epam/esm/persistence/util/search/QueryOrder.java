@@ -10,15 +10,9 @@ import java.util.Map;
 
 @Getter
 public enum QueryOrder {
-    NO(1),
-    ASC(2),
-    DESC(3);
-
-    private final Integer id;
-
-    QueryOrder(Integer id){
-        this.id = id;
-    }
+    NO,
+    ASC,
+    DESC;
 
     private static final Map<String, QueryOrder> namesMap = new HashMap<String, QueryOrder>(3);
 

@@ -1,16 +1,22 @@
 package com.epam.esm.service.util.mapper;
 
-import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.dao.GiftCertificate;
+import com.epam.esm.persistence.dao.Tag;
 import com.epam.esm.service.dto.GiftCertificateDto;
+import com.epam.esm.service.dto.TagDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
 @Component
-public class GiftCertificateMapperImpl implements AbstractEntityMapper<GiftCertificateDto, GiftCertificateDao> {
+public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertificateDto, GiftCertificate> {
+
+    @Autowired
+    private AbstractEntityMapper<TagDto, Tag> tagMapper;
 
     @Override
-    public GiftCertificateDao toDao(GiftCertificateDto giftCertificateDto) {
-        GiftCertificateDao giftCertificateDao = GiftCertificateDao.builder()
+    public GiftCertificate toEntity(GiftCertificateDto giftCertificateDto) {
+        GiftCertificate giftCertificateDao = GiftCertificate.builder()
                 .id(giftCertificateDto.getId())
                 .name(giftCertificateDto.getName())
                 .description(giftCertificateDto.getDescription())
@@ -19,13 +25,15 @@ public class GiftCertificateMapperImpl implements AbstractEntityMapper<GiftCerti
                 .createDate(giftCertificateDto.getCreateDate())
                 .lastUpdateDate(giftCertificateDto.getLastUpdateDate())
                 .build();
-        giftCertificateDto.getTags().forEach(tagDto -> giftCertificateDao
-                .addTag(new TagMapperImpl().toDao(tagDto)));
+        if (giftCertificateDto.getTags() != null) {
+            giftCertificateDto.getTags().forEach(tagDto -> giftCertificateDao
+                    .getTags().add(tagMapper.toEntity(tagDto)));
+        }
         return giftCertificateDao;
     }
 
     @Override
-    public GiftCertificateDto toDto(GiftCertificateDao giftCertificateDao) {
+    public GiftCertificateDto toDto(GiftCertificate giftCertificateDao) {
          GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                  .id(giftCertificateDao.getId())
                  .name(giftCertificateDao.getName())
@@ -35,8 +43,10 @@ public class GiftCertificateMapperImpl implements AbstractEntityMapper<GiftCerti
                  .createDate(giftCertificateDao.getCreateDate())
                  .lastUpdateDate(giftCertificateDao.getLastUpdateDate())
                  .build();
-         giftCertificateDao.getTags().forEach(tagDao -> giftCertificateDto
-         .addTag(new TagMapperImpl().toDto(tagDao)));
+         if (giftCertificateDao.getTags() != null ) {
+             giftCertificateDao.getTags().forEach(tagDao -> giftCertificateDto
+                     .getTags().add(tagMapper.toDto(tagDao)));
+         }
          return giftCertificateDto;
     }
 }

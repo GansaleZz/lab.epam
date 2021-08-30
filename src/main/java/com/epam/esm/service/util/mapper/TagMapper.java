@@ -1,22 +1,22 @@
 package com.epam.esm.service.util.mapper;
 
-import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.Tag;
 import com.epam.esm.service.dto.TagDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TagMapperImpl implements AbstractEntityMapper<TagDto, TagDao> {
+public class TagMapper implements AbstractEntityMapper<TagDto, Tag> {
 
     @Override
-    public TagDao toDao(TagDto tagDto) {
-        return TagDao.builder()
+    public Tag toEntity(TagDto tagDto) {
+        return Tag.builder()
                 .id(tagDto.getId())
                 .name(tagDto.getName())
                 .build();
     }
 
     @Override
-    public TagDto toDto(TagDao tagDao) {
+    public TagDto toDto(Tag tagDao) {
         return TagDto.builder()
                 .id(tagDao.getId())
                 .name(tagDao.getName())
