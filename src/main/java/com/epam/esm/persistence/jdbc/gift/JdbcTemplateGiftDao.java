@@ -1,6 +1,8 @@
 package com.epam.esm.persistence.jdbc.gift;
 
 import com.epam.esm.persistence.dao.GiftCertificate;
+import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.persistence.util.mapper.GiftMapperDB;
@@ -70,13 +72,15 @@ public class JdbcTemplateGiftDao implements GiftDao {
     private final GiftMapperDB giftMapper;
     private final JdbcTemplate jdbcTemplate;
     private final BaseGiftValidator<GiftCertificate, Long> giftValidation;
+    private final JdbcTemplateTagDao jdbcTemplateTagDao;
 
     @Autowired
     public JdbcTemplateGiftDao(JdbcTemplate jdbcTemplate,
-                               BaseGiftValidator<GiftCertificate, Long> giftValidation, GiftMapperDB giftMapper) {
+                               BaseGiftValidator<GiftCertificate, Long> giftValidation, GiftMapperDB giftMapper, JdbcTemplateTagDao jdbcTemplateTagDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.giftValidation = giftValidation;
         this.giftMapper = giftMapper;
+        this.jdbcTemplateTagDao = jdbcTemplateTagDao;
     }
 
     @Override
@@ -156,8 +160,11 @@ public class JdbcTemplateGiftDao implements GiftDao {
 
         giftCertificate.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         giftCertificate.getTags()
-                .forEach(i -> jdbcTemplate
-                        .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getId(),i.getId()));
+                .forEach(i -> {
+                    checkExistence(i);
+                    jdbcTemplate
+                            .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getId(),i.getId());
+                });
         return giftCertificate;
     }
 
@@ -192,9 +199,13 @@ public class JdbcTemplateGiftDao implements GiftDao {
             if (!giftCertificate.getTags().isEmpty()) {
                 jdbcTemplate.update(SQL_DELETE_GIFT_TAGS, giftCertificate.getId());
                 giftCertificate.getTags()
-                        .forEach(i -> jdbcTemplate.update(SQL_INSERT_GIFT_TAGS,
-                                giftCertificate.getId(), i.getId()));
+                        .forEach(i -> {
+                            checkExistence(i);
+                            jdbcTemplate.update(SQL_INSERT_GIFT_TAGS,
+                                    giftCertificate.getId(), i.getId());
+                        });
             }
+            giftCertificateUpdated.setTags(giftCertificate.getTags());
         }
         return giftCertificateUpdated;
     }
@@ -202,5 +213,15 @@ public class JdbcTemplateGiftDao implements GiftDao {
     @Override
     public boolean delete(Long id) {
         return jdbcTemplate.update(SQL_DELETE_GIFT,id) == 1;
+    }
+
+    private void checkExistence(Tag tag) {
+        if (tag.getId() == null && tag.getName() != null) {
+            if (jdbcTemplateTagDao.findTagByName(tag.getName()).isPresent()){
+                tag.setId(jdbcTemplateTagDao.findTagByName(tag.getName()).get().getId());
+            } else {
+                tag.setId(jdbcTemplateTagDao.create(tag).getId());
+            }
+        }
     }
 }
