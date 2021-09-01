@@ -91,7 +91,8 @@ class JdbcTemplateTagDaoImplTest {
 
         assertEquals(7, jdbcTemplateTagDao.findAllEntities().size());
         assertTrue(jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).isPresent());
-        assertEquals(tagDao.getName(), jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).get().getName());
+        assertEquals(tagDao.getName(),
+                jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).get().getName());
     }
 
     @Test

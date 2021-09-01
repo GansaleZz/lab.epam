@@ -17,10 +17,8 @@ public class GiftCertificate {
     private Long id;
     private String name;
     private String description;
-    @Builder.Default
-    private Double price = 0.0;
-    @Builder.Default
-    private Integer duration = 0;
+    private Double price;
+    private Integer duration;
     private LocalDateTime createDate;
     private LocalDateTime lastUpdateDate;
     @Builder.Default

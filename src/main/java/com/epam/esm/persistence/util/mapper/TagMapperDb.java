@@ -19,7 +19,7 @@ public class TagMapperDb implements RowMapper<Tag> {
     public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Tag.builder()
                 .id(rs.getLong("tag_id"))
-                .name(rs.getString("name"))
+                .name(rs.getString("tag_name"))
                 .build();
     }
 }

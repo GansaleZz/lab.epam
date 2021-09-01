@@ -17,9 +17,9 @@ import java.util.Optional;
 
 @Repository
 public class JdbcTemplateTagDao implements TagDao {
-    private static final String SQL_FIND_ALL_TAGS = "SELECT tag_id, name FROM tag";
-    private static final String SQL_FIND_TAG_BY_NAME = "SELECT tag_id, name FROM tag WHERE name = ?";
-    private static final String SQL_FIND_TAG_BY_ID = "SELECT tag_id, name FROM tag WHERE tag_id = ?";
+    private static final String SQL_FIND_ALL_TAGS = "SELECT tag_id, name as tag_name FROM tag";
+    private static final String SQL_FIND_TAG_BY_NAME = "SELECT tag_id, name as tag_name FROM tag WHERE name = ?";
+    private static final String SQL_FIND_TAG_BY_ID = "SELECT tag_id, name as tag_name FROM tag WHERE tag_id = ?";
     private static final String SQL_CREATE_TAG = "INSERT INTO tag(name) VALUES (?)";
     private static final String SQL_DELETE_TAG = "DELETE FROM tag WHERE tag_id = ?";
 
@@ -42,14 +42,14 @@ public class JdbcTemplateTagDao implements TagDao {
 
     @Override
     public Optional<Tag> findEntityById(Long id) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_ID, new Long[]{id},
-                tagMapper).stream().findAny();
+        return jdbcTemplate.query(SQL_FIND_TAG_BY_ID, tagMapper,
+                id).stream().findAny();
     }
 
     @Override
     public Optional<Tag> findTagByName(String name) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME, new String[]{name},
-                tagMapper).stream().findAny();
+        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME,
+                tagMapper, name).stream().findAny();
     }
 
     @Override

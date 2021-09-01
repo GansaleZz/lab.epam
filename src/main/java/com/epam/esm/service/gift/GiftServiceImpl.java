@@ -52,7 +52,7 @@ public class GiftServiceImpl implements GiftService{
     }
 
     @Override
-    @Transactional(rollbackFor = EntityBadInputException.class)
+    @Transactional
     public GiftCertificateDto create(GiftCertificateDto giftCertificateDto) {
         giftValidation.onBeforeInsert(giftCertificateDto);
         return giftMapper.toDto(jdbcTemplateGiftDao
@@ -60,7 +60,7 @@ public class GiftServiceImpl implements GiftService{
     }
 
     @Override
-    @Transactional(rollbackFor = EntityNotFoundException.class)
+    @Transactional
     public GiftCertificateDto update(GiftCertificateDto giftCertificateDto) {
         jdbcTemplateGiftDao.findEntityById(giftCertificateDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND,

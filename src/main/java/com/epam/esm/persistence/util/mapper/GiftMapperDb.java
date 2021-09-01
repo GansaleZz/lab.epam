@@ -2,6 +2,7 @@ package com.epam.esm.persistence.util.mapper;
 
 import com.epam.esm.persistence.dao.GiftCertificate;
 import com.epam.esm.persistence.dao.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import java.util.Map;
 
 @Component
 public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
+    @Autowired
+    private TagMapperDb tagMapperDb;
 
     /**
      * Implementation, which extract result set of all values of gift certificate tables columns
@@ -38,9 +41,8 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
                             .lastUpdateDate(convertToLocalDateTime(rs.getDate("last_update_date")))
                             .build());
             map.putIfAbsent(giftCertificate.getId(), giftCertificate);
-            Tag tag = Tag.builder()
-                    .id(rs.getLong("tag_id"))
-                    .name(rs.getString("tag_name")).build();
+
+            Tag tag = tagMapperDb.mapRow(rs, rs.getRow());
             if (tag.getId() != 0) {
                 giftCertificate.getTags().add(tag);
             }

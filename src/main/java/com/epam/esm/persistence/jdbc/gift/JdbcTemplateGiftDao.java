@@ -89,42 +89,12 @@ public class JdbcTemplateGiftDao implements GiftDao {
         StringBuilder query = new StringBuilder(SQL_FIND_ALL_GIFTS);
         StringBuilder queryParams = new StringBuilder();
         StringBuilder orderParams = new StringBuilder();
-        if (giftSearchFilter.getTag() != null) {
-            queryParams.append(WHERE);
-            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTag()));
-        }
-        if (giftSearchFilter.getGiftName() != null) {
-            if (!queryParams.toString().isEmpty()) {
-                queryParams.append(AND);
-            } else {
-                queryParams.append(WHERE);
-            }
-            queryParams.append(String.format(SQL_WITH_NAME, giftSearchFilter.getGiftName()));
-        }
-        if (giftSearchFilter.getGiftDescription() != null) {
-            if (!queryParams.toString().isEmpty()) {
-                queryParams.append(AND);
-            } else {
-                queryParams.append(WHERE);
-            }
-            queryParams.append(String.format(SQL_WITH_DESCRIPTION, giftSearchFilter.getGiftDescription()));
-        }
-        if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO ||
-                giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
-            orderParams.append(ORDER_BY);
-            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO) {
-                orderParams.append(GIFT_CERTIFICATE_NAME)
-                        .append(giftSearchFilter.getGiftsByNameOrder());
-            }
-            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO &&
-                    giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
-                orderParams.append(COMMA);
-            }
-            if (giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
-                orderParams.append(CREATE_DATE)
-                        .append(giftSearchFilter.getGiftsByDateOrder());
-            }
-        }
+
+        addTag(giftSearchFilter, queryParams);
+        addPartOfName(giftSearchFilter, queryParams);
+        addPartOfDescription(giftSearchFilter, queryParams);
+        addOrderOfSearch(giftSearchFilter, orderParams);
+
         query.append(queryParams);
         query.append(orderParams);
         return jdbcTemplate.query(query.toString(), giftMapper);
@@ -132,9 +102,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
 
     @Override
     public Optional<GiftCertificate> findEntityById(Long id) {
-
-        return jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,
-               new Long[]{id}, giftMapper).stream().findAny();
+        return jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,giftMapper, id).stream().findAny();
     }
 
     @Override
@@ -165,6 +133,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
                     jdbcTemplate
                             .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getId(),i.getId());
                 });
+
         return giftCertificate;
     }
 
@@ -172,10 +141,9 @@ public class JdbcTemplateGiftDao implements GiftDao {
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
         GiftCertificate giftCertificateUpdated = jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,
-                new Long[]{giftCertificate.getId()}, giftMapper).stream()
+                giftMapper, giftCertificate.getId() ).stream()
                 .findAny()
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificate.getId())));
-
 
         if (giftCertificate.getName() != null) {
             giftCertificateUpdated.setName(giftCertificate.getName());
@@ -207,6 +175,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
             }
             giftCertificateUpdated.setTags(giftCertificate.getTags());
         }
+
         return giftCertificateUpdated;
     }
 
@@ -221,6 +190,58 @@ public class JdbcTemplateGiftDao implements GiftDao {
                 tag.setId(jdbcTemplateTagDao.findTagByName(tag.getName()).get().getId());
             } else {
                 tag.setId(jdbcTemplateTagDao.create(tag).getId());
+            }
+        }
+    }
+
+    private void addTag(GiftSearchFilter giftSearchFilter,
+                        StringBuilder queryParams) {
+        if (giftSearchFilter.getTag() != null) {
+            queryParams.append(WHERE);
+            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTag()));
+        }
+    }
+
+    private void addPartOfName(GiftSearchFilter giftSearchFilter,
+                               StringBuilder queryParams) {
+        if (giftSearchFilter.getGiftName() != null) {
+            if (!queryParams.toString().isEmpty()) {
+                queryParams.append(AND);
+            } else {
+                queryParams.append(WHERE);
+            }
+            queryParams.append(String.format(SQL_WITH_NAME, giftSearchFilter.getGiftName()));
+        }
+    }
+
+    private void addPartOfDescription(GiftSearchFilter giftSearchFilter,
+                                      StringBuilder queryParams) {
+        if (giftSearchFilter.getGiftDescription() != null) {
+            if (!queryParams.toString().isEmpty()) {
+                queryParams.append(AND);
+            } else {
+                queryParams.append(WHERE);
+            }
+            queryParams.append(String.format(SQL_WITH_DESCRIPTION, giftSearchFilter.getGiftDescription()));
+        }
+    }
+
+    private void addOrderOfSearch(GiftSearchFilter giftSearchFilter,
+                                  StringBuilder orderParams) {
+        if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO ||
+                giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+            orderParams.append(ORDER_BY);
+            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO) {
+                orderParams.append(GIFT_CERTIFICATE_NAME)
+                        .append(giftSearchFilter.getGiftsByNameOrder());
+            }
+            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO &&
+                    giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+                orderParams.append(COMMA);
+            }
+            if (giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+                orderParams.append(CREATE_DATE)
+                        .append(giftSearchFilter.getGiftsByDateOrder());
             }
         }
     }

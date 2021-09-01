@@ -48,7 +48,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional(rollbackFor = EntityBadInputException.class)
     public TagDto create(TagDto tagDto) {
         tagValidation.onBeforeInsert(tagDto);
         return tagMapper.toDto(jdbcTemplateTagDao

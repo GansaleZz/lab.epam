@@ -42,7 +42,8 @@ class JdbcTemplateGiftDaoImplTest {
                                        BaseGiftValidator<GiftCertificate, Long> giftValidation,
                                        GiftMapperDb giftMapperDB,
                                        JdbcTemplateTagDao jdbcTemplateTagDao) {
-        jdbcTemplateGiftDao = new JdbcTemplateGiftDao(jdbcTemplate, giftValidation, giftMapperDB, jdbcTemplateTagDao);
+        jdbcTemplateGiftDao = new JdbcTemplateGiftDao(jdbcTemplate, giftValidation,
+                giftMapperDB, jdbcTemplateTagDao);
     }
 
     @Test
