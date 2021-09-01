@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class GiftMapperDB implements ResultSetExtractor<List<GiftCertificate>> {
+public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
 
     /**
      * Implementation, which extract result set of all values of gift certificate tables columns

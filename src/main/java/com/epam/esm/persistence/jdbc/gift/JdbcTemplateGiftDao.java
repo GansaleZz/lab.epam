@@ -5,7 +5,7 @@ import com.epam.esm.persistence.dao.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
-import com.epam.esm.persistence.util.mapper.GiftMapperDB;
+import com.epam.esm.persistence.util.mapper.GiftMapperDb;
 import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +69,14 @@ public class JdbcTemplateGiftDao implements GiftDao {
     private static final String CREATE_DATE = " create_date ";
     private static final String NOT_FOUND = "Requested gift not found (id = %s)";
 
-    private final GiftMapperDB giftMapper;
+    private final GiftMapperDb giftMapper;
     private final JdbcTemplate jdbcTemplate;
     private final BaseGiftValidator<GiftCertificate, Long> giftValidation;
     private final JdbcTemplateTagDao jdbcTemplateTagDao;
 
     @Autowired
     public JdbcTemplateGiftDao(JdbcTemplate jdbcTemplate,
-                               BaseGiftValidator<GiftCertificate, Long> giftValidation, GiftMapperDB giftMapper, JdbcTemplateTagDao jdbcTemplateTagDao) {
+                               BaseGiftValidator<GiftCertificate, Long> giftValidation, GiftMapperDb giftMapper, JdbcTemplateTagDao jdbcTemplateTagDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.giftValidation = giftValidation;
         this.giftMapper = giftMapper;

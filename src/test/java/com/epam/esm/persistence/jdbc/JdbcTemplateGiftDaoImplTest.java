@@ -5,7 +5,7 @@ import com.epam.esm.persistence.dao.GiftCertificate;
 import com.epam.esm.persistence.jdbc.gift.GiftDao;
 import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
-import com.epam.esm.persistence.util.mapper.GiftMapperDB;
+import com.epam.esm.persistence.util.mapper.GiftMapperDb;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.util.validation.BaseGiftValidator;
@@ -40,7 +40,7 @@ class JdbcTemplateGiftDaoImplTest {
     @Autowired
     public JdbcTemplateGiftDaoImplTest(JdbcTemplate jdbcTemplate,
                                        BaseGiftValidator<GiftCertificate, Long> giftValidation,
-                                       GiftMapperDB giftMapperDB,
+                                       GiftMapperDb giftMapperDB,
                                        JdbcTemplateTagDao jdbcTemplateTagDao) {
         jdbcTemplateGiftDao = new JdbcTemplateGiftDao(jdbcTemplate, giftValidation, giftMapperDB, jdbcTemplateTagDao);
     }

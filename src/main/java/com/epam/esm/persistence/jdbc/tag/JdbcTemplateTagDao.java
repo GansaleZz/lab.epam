@@ -1,7 +1,7 @@
 package com.epam.esm.persistence.jdbc.tag;
 
 import com.epam.esm.persistence.dao.Tag;
-import com.epam.esm.persistence.util.mapper.TagMapperDB;
+import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,12 +23,12 @@ public class JdbcTemplateTagDao implements TagDao {
     private static final String SQL_CREATE_TAG = "INSERT INTO tag(name) VALUES (?)";
     private static final String SQL_DELETE_TAG = "DELETE FROM tag WHERE tag_id = ?";
 
-    private final TagMapperDB tagMapper;
+    private final TagMapperDb tagMapper;
     private final JdbcTemplate jdbcTemplate;
     private final BaseTagValidator<Tag, Long> tagValidation;
 
     @Autowired
-    public JdbcTemplateTagDao(JdbcTemplate jdbcTemplate, BaseTagValidator<Tag, Long> tagValidation, TagMapperDB tagMapper) {
+    public JdbcTemplateTagDao(JdbcTemplate jdbcTemplate, BaseTagValidator<Tag, Long> tagValidation, TagMapperDb tagMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.tagValidation = tagValidation;
         this.tagMapper = tagMapper;

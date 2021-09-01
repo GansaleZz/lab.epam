@@ -3,7 +3,7 @@ package com.epam.esm.persistence.jdbc;
 import com.epam.esm.TestConfig;
 import com.epam.esm.persistence.dao.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
-import com.epam.esm.persistence.util.mapper.TagMapperDB;
+import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class JdbcTemplateTagDaoImplTest {
     @Autowired
     public JdbcTemplateTagDaoImplTest(JdbcTemplate jdbcTemplate,
                                       BaseTagValidator<Tag, Long> tagValidation,
-                                      TagMapperDB tagMapperDB) {
+                                      TagMapperDb tagMapperDB) {
         this.jdbcTemplateTagDao = new JdbcTemplateTagDao(jdbcTemplate, tagValidation, tagMapperDB);
     }
 

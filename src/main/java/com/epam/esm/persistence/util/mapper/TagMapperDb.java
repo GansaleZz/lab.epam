@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class TagMapperDB implements RowMapper<Tag> {
+public class TagMapperDb implements RowMapper<Tag> {
 
     /**
      * Implementation, which extract result set of all values of tag tables columns
