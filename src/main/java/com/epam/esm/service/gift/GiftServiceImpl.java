@@ -34,7 +34,6 @@ public class GiftServiceImpl implements GiftService{
 
 
     @Override
-    @Transactional
     public List<GiftCertificateDto> findAllGifts(GiftSearchFilter giftSearchFilter) {
         giftValidation.onBeforeFindAllEntities(giftSearchFilter);
         return jdbcTemplateGiftDao.findAllEntities(giftSearchFilter)
