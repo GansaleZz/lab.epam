@@ -144,7 +144,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
                 giftMapper, giftCertificate.getId() ).stream()
                 .findAny()
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificate.getId())));
-
+        System.out.println(giftCertificateUpdated);
         if (giftCertificate.getName() != null) {
             giftCertificateUpdated.setName(giftCertificate.getName());
         }
@@ -172,10 +172,10 @@ public class JdbcTemplateGiftDao implements GiftDao {
                             jdbcTemplate.update(SQL_INSERT_GIFT_TAGS,
                                     giftCertificate.getId(), i.getId());
                         });
+                giftCertificateUpdated.setTags(giftCertificate.getTags());
             }
-            giftCertificateUpdated.setTags(giftCertificate.getTags());
         }
-
+        System.out.println(giftCertificateUpdated);
         return giftCertificateUpdated;
     }
 

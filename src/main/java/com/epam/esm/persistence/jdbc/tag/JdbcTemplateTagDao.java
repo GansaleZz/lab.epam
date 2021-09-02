@@ -55,16 +55,21 @@ public class JdbcTemplateTagDao implements TagDao {
     @Override
     public Tag create(Tag tag) {
         tagValidation.onBeforeInsert(tag);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        if (findTagByName(tag.getName()).isPresent()) {
+            return findTagByName(tag.getName()).get();
+        } else {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(SQL_CREATE_TAG,
-                    Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, tag.getName());
-            return preparedStatement;
-        }, keyHolder);
-        tag.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        return tag;
+            jdbcTemplate.update(connection -> {
+                PreparedStatement preparedStatement = connection.prepareStatement(SQL_CREATE_TAG,
+                        Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setString(1, tag.getName());
+                return preparedStatement;
+            }, keyHolder);
+
+            tag.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+            return tag;
+        }
     }
 
     @Override
