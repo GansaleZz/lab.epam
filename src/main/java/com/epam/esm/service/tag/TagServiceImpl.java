@@ -5,7 +5,6 @@ import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.util.validation.BaseTagValidator;
-import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +46,7 @@ public class TagServiceImpl implements TagService {
                  .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID, id)));
     }
 
+    @Transactional
     @Override
     public TagDto create(TagDto tagDto) {
         tagValidation.onBeforeInsert(tagDto);

@@ -6,7 +6,6 @@ import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.util.validation.BaseGiftValidator;
-import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
