@@ -3,48 +3,49 @@ package com.epam.esm.web.controller;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.gift.GiftService;
-import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/gifts")
 public class GiftController {
     private final GiftService giftService;
-    private final BaseGiftValidator<GiftCertificateDto, Long> giftValidation;
+    private final static String BAD_INPUT = "Please enter correct details for ";
 
     @Autowired
-    public GiftController(GiftService giftService, BaseGiftValidator<GiftCertificateDto, Long> giftValidation) {
+    public GiftController(GiftService giftService) {
         this.giftService = giftService;
-        this.giftValidation = giftValidation;
     }
 
     /**
      * Extracts all gift certificates from bd.
-     * @param giftSearchFilter need to set settings of searching gift certificates on bd.
      * @return found list of gift certificates on JSON format.
      * @throws EntityBadInputException if one of filters fields is incorrect.
      */
-    @GetMapping
-    public ResponseEntity<List<GiftCertificateDto>> listOfGifts(@RequestBody(required = false) GiftSearchFilter giftSearchFilter) throws EntityBadInputException {
-        if (giftSearchFilter == null) {
-            giftSearchFilter = new GiftSearchFilter();
+    @GetMapping()
+    public ResponseEntity<List<GiftCertificateDto>> listOfGifts(@Valid GiftSearchFilter giftSearchFilter,
+                                                                BindingResult bindingResult)
+            throws EntityBadInputException {
+
+        if (bindingResult.hasErrors()) {
+            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
 
-        giftValidation.onBeforeFindAllEntities(giftSearchFilter);
         return new ResponseEntity<>(giftService.findAllGifts(giftSearchFilter), HttpStatus.OK);
     }
 
@@ -67,8 +68,10 @@ public class GiftController {
      * @throws EntityBadInputException if one of params is incorrect.
      */
     @PostMapping
-    public ResponseEntity<GiftCertificateDto> create(@RequestBody GiftCertificateDto dto) throws EntityBadInputException {
-        giftValidation.onBeforeInsert(dto);
+    public ResponseEntity<GiftCertificateDto> create(@Valid @RequestBody GiftCertificateDto dto, BindingResult error) {
+        if (error.hasErrors()) {
+            throw new EntityBadInputException(error.getFieldError().getDefaultMessage());
+        }
         return new ResponseEntity<>(giftService.create(dto), HttpStatus.CREATED);
     }
 
@@ -79,7 +82,7 @@ public class GiftController {
      * @return updated gift certificate on JSON format.
      * @throws EntityNotFoundException if gift certificate does not exist.
      */
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<GiftCertificateDto> update(@PathVariable("id") Long id,
                                                      @RequestBody GiftCertificateDto dto ) throws EntityNotFoundException {
         dto.setId(id);

@@ -1,8 +1,6 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.TestConfig;
-import com.epam.esm.persistence.util.search.GiftSearchFilter;
-import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 
+import java.time.Duration;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -67,14 +66,7 @@ class GiftControllerTest {
     @Test
     void findAllGiftsWithTagExists() {
         try {
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter
-                    .builder()
-                    .tag("TAG_TEST_1")
-                    .build();
-
-            mockMvc.perform(get("/gifts")
-                            .content(objectMapper.writeValueAsString(giftSearchFilter))
-                            .contentType(MediaType.APPLICATION_JSON))
+            mockMvc.perform(get("/gifts?tag=TAG_TEST_1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)));
         } catch (Exception e) {
@@ -86,14 +78,10 @@ class GiftControllerTest {
     void findAllGiftsWithTagNotExists() {
         try {
             String tagName = "Tag bad request";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter
-                    .builder()
-                    .tag(tagName)
-                    .build();
 
-            mockMvc.perform(get("/gifts")
-                    .content(objectMapper.writeValueAsString(giftSearchFilter))
-                    .contentType(MediaType.APPLICATION_JSON))
+            mockMvc.perform(
+                    get("/gifts?tag="+tagName)
+            )
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(0)));
         } catch (Exception e) {
@@ -107,17 +95,12 @@ class GiftControllerTest {
             String tagName = "TAG_TEST_2";
             String namePart = "TEST1";
             String descriptionPart = "_";
-            GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
-                    .giftName(namePart)
-                    .tag(tagName)
-                    .giftDescription(descriptionPart)
-                    .giftsByNameOrder(QueryOrder.ASC)
-                    .giftsByDateOrder(QueryOrder.DESC)
-                    .build();
 
-            mockMvc.perform(get("/gifts")
-                    .content(objectMapper.writeValueAsString(giftSearchFilter))
-                    .contentType(MediaType.APPLICATION_JSON))
+            mockMvc.perform(
+                    get("/gifts?tag=" + tagName +
+                    "&giftName=" + namePart + "&giftDescription=" + descriptionPart +
+                    "&giftsByNameOrder=ASC&giftsByDateOrder=DESC")
+            )
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)))
                     .andExpect(jsonPath("$[?(@.name == 'TEST1')]").exists());
@@ -144,7 +127,7 @@ class GiftControllerTest {
         try {
             mockMvc.perform(
                     get("/gifts/"+123))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isNoContent())
                     .andExpect(mvcResult -> mvcResult.getResolvedException()
                             .getClass()
                             .equals(EntityNotFoundException.class));
@@ -159,7 +142,7 @@ class GiftControllerTest {
             String name = "Just for test";
             String description = "Description for test";
             double price = 100;
-            int duration = 200;
+            Duration duration = Duration.ofDays(200);
             GiftCertificateDto giftCertificateDto = GiftCertificateDto
                     .builder()
                     .id(5L)
@@ -199,7 +182,7 @@ class GiftControllerTest {
     void updateSuccess() {
         try {
             String name = "New name";
-            int duration = 11;
+            Duration duration = Duration.ofDays(11);
             GiftCertificateDto giftCertificateDto = GiftCertificateDto
                     .builder()
                     .id(4L)
@@ -220,7 +203,7 @@ class GiftControllerTest {
     void updateFailNotFound() {
         try {
             String name = "New name";
-            int duration = 11;
+            Duration duration = Duration.ofDays(11);
             GiftCertificateDto giftCertificateDto = GiftCertificateDto
                     .builder()
                     .name(name)
@@ -230,7 +213,7 @@ class GiftControllerTest {
             mockMvc.perform(put("/gifts/5")
                     .content(objectMapper.writeValueAsString(giftCertificateDto))
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         } catch (Exception e) {
             fail("Unexpected exception", e);
         }
@@ -250,7 +233,7 @@ class GiftControllerTest {
     void deleteFailNotFound() {
         try {
             mockMvc.perform(delete("/gifts/5"))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         } catch (Exception e) {
             fail("Unexpected exception", e);
         }

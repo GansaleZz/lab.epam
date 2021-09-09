@@ -1,7 +1,7 @@
 package com.epam.esm.persistence.jdbc;
 
 import com.epam.esm.TestConfig;
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
@@ -62,23 +62,6 @@ class JdbcTemplateTagDaoImplTest {
         Long badId = 150L;
 
         assertEquals(Optional.empty(), jdbcTemplateTagDao.findEntityById(badId));
-    }
-
-    @Test
-    void findTagByNameExists() {
-        String name = "TAG_TEST_2";
-
-        Optional<Tag> tagDao = jdbcTemplateTagDao.findTagByName(name);
-
-        assertTrue(tagDao.isPresent());
-        assertEquals(name, tagDao.get().getName());
-    }
-
-    @Test
-    void findTagByNameFailNotFound() {
-        String name = "Random name of tag";
-
-        assertEquals(Optional.empty(), jdbcTemplateTagDao.findTagByName(name));
     }
 
     @Test

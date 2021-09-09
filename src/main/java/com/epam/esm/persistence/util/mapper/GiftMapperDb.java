@@ -1,7 +1,7 @@
 package com.epam.esm.persistence.util.mapper;
 
-import com.epam.esm.persistence.dao.GiftCertificate;
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.entity.GiftCertificate;
+import com.epam.esm.persistence.entity.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,8 +36,8 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
                             .id(rs.getLong("gift_id"))
                             .name(rs.getString("name"))
                             .description(rs.getString("description"))
-                            .price(rs.getDouble("price"))
-                            .duration(rs.getInt("duration"))
+                            .price(rs.getBigDecimal("price"))
+                            .duration(Duration.ofDays(rs.getLong("duration")))
                             .createDate(convertToLocalDateTime(rs.getDate("create_date")))
                             .lastUpdateDate(convertToLocalDateTime(rs.getDate("last_update_date")))
                             .build());

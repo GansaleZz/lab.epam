@@ -32,11 +32,4 @@ public interface TagService {
      * @return returns true if tag was deleted, else returns false.
      */
     boolean delete(Long id);
-
-    /**
-     * Searching tag on db by its name.
-     * @param name parameter of tag, by which we searching it.
-     * @return tag if it exists else throws exception.
-     */
-    TagDto findTagByName(String name);
 }

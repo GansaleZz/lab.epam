@@ -1,7 +1,8 @@
 package com.epam.esm.persistence.jdbc.gift;
 
-import com.epam.esm.persistence.dao.GiftCertificate;
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.dao.GiftDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
@@ -9,6 +10,7 @@ import com.epam.esm.persistence.util.mapper.GiftMapperDb;
 import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -117,8 +119,8 @@ public class JdbcTemplateGiftDao implements GiftDao {
                     .prepareStatement(SQL_CREATE_GIFT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, giftCertificate.getName());
             preparedStatement.setString(2, giftCertificate.getDescription());
-            preparedStatement.setDouble(3, giftCertificate.getPrice());
-            preparedStatement.setInt(4, giftCertificate.getDuration());
+            preparedStatement.setBigDecimal(3, giftCertificate.getPrice());
+            preparedStatement.setLong(4, giftCertificate.getDuration().toDays());
             preparedStatement.setDate(5,
                     Date.valueOf(giftCertificate.getCreateDate().toLocalDate()));
             preparedStatement.setDate(6,
@@ -160,7 +162,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
 
         jdbcTemplate.update(SQL_UPDATE_GIFT, giftCertificateUpdated.getName(),
                 giftCertificateUpdated.getDescription(), giftCertificateUpdated.getPrice(),
-                giftCertificateUpdated.getDuration(),
+                giftCertificateUpdated.getDuration().toDays(),
                 Date.valueOf(LocalDateTime.now().toLocalDate()),
                 giftCertificateUpdated.getId());
         if (giftCertificate.getTags() != null) {
@@ -186,11 +188,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
 
     private void checkExistence(Tag tag) {
         if (tag.getId() == null && tag.getName() != null) {
-            if (jdbcTemplateTagDao.findTagByName(tag.getName()).isPresent()){
-                tag.setId(jdbcTemplateTagDao.findTagByName(tag.getName()).get().getId());
-            } else {
-                tag.setId(jdbcTemplateTagDao.create(tag).getId());
-            }
+            tag.setId(jdbcTemplateTagDao.create(tag).getId());
         }
     }
 

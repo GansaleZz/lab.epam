@@ -1,8 +1,8 @@
 package com.epam.esm.persistence.jdbc;
 
 import com.epam.esm.TestConfig;
-import com.epam.esm.persistence.dao.GiftCertificate;
-import com.epam.esm.persistence.jdbc.gift.GiftDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
+import com.epam.esm.persistence.dao.GiftDao;
 import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.persistence.util.mapper.GiftMapperDb;
@@ -20,6 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -191,7 +192,7 @@ class JdbcTemplateGiftDaoImplTest {
                     .builder()
                     .name("Simple test")
                     .description("Only for test")
-                    .duration(1)
+                    .duration(Duration.ofDays(1))
                     .price(1.0)
                     .build();
 

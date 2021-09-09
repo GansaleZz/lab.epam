@@ -1,6 +1,6 @@
 package com.epam.esm.service.util.mapper;
 
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.service.dto.TagDto;
 import org.springframework.stereotype.Component;
 

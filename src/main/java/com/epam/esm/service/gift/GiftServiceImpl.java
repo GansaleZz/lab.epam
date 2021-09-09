@@ -1,11 +1,10 @@
 package com.epam.esm.service.gift;
 
-import com.epam.esm.persistence.dao.GiftCertificate;
-import com.epam.esm.persistence.jdbc.gift.GiftDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
+import com.epam.esm.persistence.dao.GiftDao;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,25 +17,21 @@ import java.util.stream.Collectors;
 public class GiftServiceImpl implements GiftService{
 
     private static final String NOT_FOUND = "Requested gift not found (id = %s)";
-    private final GiftDao jdbcTemplateGiftDao;
+    private final GiftDao giftDao;
     private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
-    private final BaseGiftValidator<GiftCertificateDto, Long> giftValidation;
 
     @Autowired
-    public GiftServiceImpl(GiftDao jdbcTemplateGiftDao,
+    public GiftServiceImpl(GiftDao giftDao,
                            AbstractEntityMapper<GiftCertificateDto,
-                                   GiftCertificate> giftCertificateMapper,
-                           BaseGiftValidator<GiftCertificateDto, Long> giftValidation) {
-        this.jdbcTemplateGiftDao = jdbcTemplateGiftDao;
+                                   GiftCertificate> giftCertificateMapper) {
+        this.giftDao = giftDao;
         this.giftMapper = giftCertificateMapper;
-        this.giftValidation = giftValidation;
     }
 
 
     @Override
     public List<GiftCertificateDto> findAllGifts(GiftSearchFilter giftSearchFilter) {
-        giftValidation.onBeforeFindAllEntities(giftSearchFilter);
-        return jdbcTemplateGiftDao.findAllEntities(giftSearchFilter)
+        return giftDao.findAllEntities(giftSearchFilter)
                 .stream()
                 .map(giftMapper::toDto)
                 .collect(Collectors.toList());
@@ -44,7 +39,7 @@ public class GiftServiceImpl implements GiftService{
 
     @Override
     public GiftCertificateDto findGiftById(Long id) {
-        return jdbcTemplateGiftDao.findEntityById(id)
+        return giftDao.findEntityById(id)
                 .map(giftMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, id)));
     }
@@ -52,25 +47,24 @@ public class GiftServiceImpl implements GiftService{
     @Override
     @Transactional
     public GiftCertificateDto create(GiftCertificateDto giftCertificateDto) {
-        giftValidation.onBeforeInsert(giftCertificateDto);
-        return giftMapper.toDto(jdbcTemplateGiftDao
+        return giftMapper.toDto(giftDao
                 .create(giftMapper.toEntity(giftCertificateDto)));
     }
 
     @Override
     @Transactional
     public GiftCertificateDto update(GiftCertificateDto giftCertificateDto) {
-        jdbcTemplateGiftDao.findEntityById(giftCertificateDto.getId())
+        giftDao.findEntityById(giftCertificateDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND,
                         giftCertificateDto.getId())));
 
-        return giftMapper.toDto(jdbcTemplateGiftDao.update(giftMapper
+        return giftMapper.toDto(giftDao.update(giftMapper
                 .toEntity(giftCertificateDto)));
     }
 
     @Override
     public boolean delete(Long id) {
-        if (!jdbcTemplateGiftDao.delete(id)) {
+        if (!giftDao.delete(id)) {
             throw new EntityNotFoundException(String.format(NOT_FOUND, id));
         } else {
             return true;

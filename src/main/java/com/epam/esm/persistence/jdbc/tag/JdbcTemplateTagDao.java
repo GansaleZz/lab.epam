@@ -1,9 +1,11 @@
 package com.epam.esm.persistence.jdbc.tag;
 
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -47,12 +49,6 @@ public class JdbcTemplateTagDao implements TagDao {
     }
 
     @Override
-    public Optional<Tag> findTagByName(String name) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME,
-                tagMapper, name).stream().findAny();
-    }
-
-    @Override
     public Tag create(Tag tag) {
         tagValidation.onBeforeInsert(tag);
         if (findTagByName(tag.getName()).isPresent()) {
@@ -75,5 +71,10 @@ public class JdbcTemplateTagDao implements TagDao {
     @Override
     public boolean delete(Long id) {
         return jdbcTemplate.update(SQL_DELETE_TAG,id) == 1;
+    }
+
+    private Optional<Tag> findTagByName(String name) {
+        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME,
+                tagMapper, name).stream().findAny();
     }
 }

@@ -1,11 +1,10 @@
 package com.epam.esm.service;
 
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagServiceImpl;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.util.validation.dto.TagDtoValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,9 +32,6 @@ public class TagServiceTest {
 
     @Mock
     private AbstractEntityMapper<TagDto, Tag> tagMapper;
-
-    @Mock
-    private TagDtoValidator tagValidationDto;
 
     @InjectMocks
     private TagServiceImpl tagService;
@@ -77,30 +72,6 @@ public class TagServiceTest {
         assertThrows(EntityNotFoundException.class, () -> tagService.findTagById(2L));
         verify(jdbcTemplateTagDao, times(1))
                 .findEntityById(any());
-    }
-
-    @Test
-    void findTagByNameExists() {
-        TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
-        Tag tagDao = Tag.builder().id(1L).name("Test").build();
-
-        when(tagMapper.toDto(any())).thenReturn(tagDto);
-        when(jdbcTemplateTagDao.findTagByName("Test"))
-                .thenReturn(Optional.of(tagDao));
-
-        assertEquals(tagDto, tagService.findTagByName("Test"));
-        verify(jdbcTemplateTagDao, times(1))
-                .findTagByName(anyString());
-    }
-
-    @Test
-    void findTagByNameNotFound() {
-        when(jdbcTemplateTagDao.findTagByName(anyString()))
-                .thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> tagService.findTagByName("Test"));
-        verify(jdbcTemplateTagDao, times(1))
-                .findTagByName(anyString());
     }
 
     @Test

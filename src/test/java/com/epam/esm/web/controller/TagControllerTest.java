@@ -72,28 +72,7 @@ public class TagControllerTest {
     void findTagByIdFailNotFound() {
         try {
             mockMvc.perform(get("/tags/8"))
-                    .andExpect(status().isNotFound());
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
-    }
-
-    @Test
-    void findTagByNameExists() {
-        try {
-            mockMvc.perform(get("/tags/name/TAG_TEST_1"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(1));
-        } catch (Exception e) {
-            fail("Unexpected exception", e);
-        }
-    }
-
-    @Test
-    void findTagByNameFailNotFound() {
-        try {
-            mockMvc.perform(get("/tags/name/Random_Name"))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         } catch (Exception e) {
             fail("Unexpected exception", e);
         }
@@ -142,7 +121,7 @@ public class TagControllerTest {
     void deleteFailNotFound() {
         try {
             mockMvc.perform(delete("/tags/100"))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         } catch (Exception e) {
             fail("Unexpected exception", e);
         }

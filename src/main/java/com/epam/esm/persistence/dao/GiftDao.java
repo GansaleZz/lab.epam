@@ -1,7 +1,6 @@
-package com.epam.esm.persistence.jdbc.gift;
+package com.epam.esm.persistence.dao;
 
-import com.epam.esm.persistence.dao.GiftCertificate;
-import com.epam.esm.persistence.jdbc.BaseDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.epam.esm.persistence.util.mapper;
 
-import com.epam.esm.persistence.dao.Tag;
+import com.epam.esm.persistence.entity.Tag;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.epam.esm.persistence.jdbc;
+package com.epam.esm.persistence.dao;
 
 
 import java.util.Optional;

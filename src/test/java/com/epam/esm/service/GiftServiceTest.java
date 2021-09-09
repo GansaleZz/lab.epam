@@ -1,12 +1,11 @@
 package com.epam.esm.service;
 
-import com.epam.esm.persistence.dao.GiftCertificate;
+import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.gift.GiftServiceImpl;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.util.validation.dto.GiftDtoValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -35,8 +35,6 @@ public class GiftServiceTest {
     @Mock
     private AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 
-    @Mock
-    private GiftDtoValidator giftValidationDto;
 
     @InjectMocks
     private GiftServiceImpl giftService;
@@ -48,13 +46,13 @@ public class GiftServiceTest {
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
 
         when(giftMapper.toDto(any())).thenReturn(giftCertificateDto);
@@ -85,13 +83,13 @@ public class GiftServiceTest {
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
 
         when(giftMapper.toDto(any())).thenReturn(giftCertificateDto);
@@ -117,27 +115,27 @@ public class GiftServiceTest {
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificate giftCertificateDaoRes = GiftCertificate.builder()
                 .id(2L)
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDtoRes = GiftCertificateDto.builder()
                 .id(2L)
                 .name("Test1")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
 
         when(giftMapper.toEntity(any()))
@@ -176,7 +174,7 @@ public class GiftServiceTest {
                 .name("Test")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
                 .id(2L)
@@ -187,7 +185,7 @@ public class GiftServiceTest {
                 .name("Test")
                 .description("Test_test1")
                 .price(100.0)
-                .duration(10)
+                .duration(Duration.ofDays(10))
                 .build();
 
         when(giftMapper.toEntity(any()))
