@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @RestController
 public class ResponseEntityException extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) throws Exception{
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), String.format("%s", LocalDateTime.now()));
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) throws Exception{
+//        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), String.format("%s", LocalDateTime.now()));
+//        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public final ResponseEntity<Object> handleAllExceptions(EntityNotFoundException ex, WebRequest request) throws Exception{

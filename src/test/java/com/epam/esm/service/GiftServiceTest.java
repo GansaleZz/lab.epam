@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,13 +46,13 @@ public class GiftServiceTest {
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
 
@@ -82,13 +83,13 @@ public class GiftServiceTest {
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
 
@@ -114,27 +115,27 @@ public class GiftServiceTest {
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificate giftCertificateDaoRes = GiftCertificate.builder()
                 .id(2L)
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificateDto giftCertificateDtoRes = GiftCertificateDto.builder()
                 .id(2L)
                 .name("Test1")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
 
@@ -173,7 +174,7 @@ public class GiftServiceTest {
                 .id(2L)
                 .name("Test")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
@@ -184,7 +185,7 @@ public class GiftServiceTest {
                 .id(2L)
                 .name("Test")
                 .description("Test_test1")
-                .price(100.0)
+                .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
 

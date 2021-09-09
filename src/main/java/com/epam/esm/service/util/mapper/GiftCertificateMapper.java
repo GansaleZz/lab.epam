@@ -17,7 +17,7 @@ public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertifica
     @Override
     public GiftCertificate toEntity(GiftCertificateDto giftCertificateDto) {
         GiftCertificate giftCertificateDao = GiftCertificate.builder()
-                .id(giftCertificateDto.getId())
+                .giftId(giftCertificateDto.getId())
                 .name(giftCertificateDto.getName())
                 .description(giftCertificateDto.getDescription())
                 .price(giftCertificateDto.getPrice())
@@ -35,7 +35,7 @@ public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertifica
     @Override
     public GiftCertificateDto toDto(GiftCertificate giftCertificateDao) {
          GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
-                 .id(giftCertificateDao.getId())
+                 .id(giftCertificateDao.getGiftId())
                  .name(giftCertificateDao.getName())
                  .description(giftCertificateDao.getDescription())
                  .price(giftCertificateDao.getPrice())

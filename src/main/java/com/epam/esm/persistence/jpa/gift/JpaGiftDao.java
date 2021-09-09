@@ -1,11 +1,13 @@
 package com.epam.esm.persistence.jpa.gift;
 
 import com.epam.esm.persistence.dao.GiftDao;
+import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.web.exception.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +27,20 @@ import java.util.Optional;
 
 @Repository
 public class JpaGiftDao implements GiftDao {
+
+    private static final String ID = "giftId";
+    private static final String NOT_FOUND = "Requested gift not found";
+    private static final String NAME = "name";
+    private static final String DESCRIPTION = "description";
+    private static final String PERCENT = "%";
+    private static final String TAGS = "tags";
+    private static final String CREATE_DATE = "createDate";
+
    @PersistenceContext
    private EntityManager entityManager;
+
+   @Autowired
+   private TagDao tagDao;
 
     @Override
     public List<GiftCertificate> findAllEntities(GiftSearchFilter giftSearchFilter) {
@@ -34,16 +48,22 @@ public class JpaGiftDao implements GiftDao {
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
                 .createQuery(GiftCertificate.class);
         Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-        CriteriaQuery<GiftCertificate> all = criteriaQuery.select(root);
+        CriteriaQuery<GiftCertificate> allGifts = criteriaQuery.select(root);
 
-        whereClause(giftSearchFilter, all, root, criteriaBuilder);
-        all.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
-        return entityManager.createQuery(all).getResultList();
+        whereClause(giftSearchFilter, allGifts, root, criteriaBuilder);
+        allGifts.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
+        return entityManager.createQuery(allGifts).getResultList();
     }
 
     @Override
     public Optional<GiftCertificate> findEntityById(Long id) {
-        return Optional.of(entityManager.find(GiftCertificate.class, id));
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+        CriteriaQuery<GiftCertificate> giftCertificate = criteriaQuery.select(root);
+        giftCertificate.where(criteriaBuilder.equal(root.get(ID), id));
+
+        return entityManager.createQuery(giftCertificate).getResultList().stream().findAny();
     }
 
     @Override
@@ -51,7 +71,7 @@ public class JpaGiftDao implements GiftDao {
     public GiftCertificate create(GiftCertificate giftCertificate) {
         giftCertificate.setCreateDate(LocalDateTime.now());
         giftCertificate.setLastUpdateDate(LocalDateTime.now());
-        giftCertificate.getTags().forEach(this::checkExistence);
+        giftCertificate.getTags().forEach(tag -> tagDao.create(tag));
 
         entityManager.persist(giftCertificate);
 
@@ -60,7 +80,7 @@ public class JpaGiftDao implements GiftDao {
 
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
-        Optional<GiftCertificate> optional = findEntityById(giftCertificate.getId());
+        Optional<GiftCertificate> optional = findEntityById(giftCertificate.getGiftId());
         if (optional.isPresent()) {
             GiftCertificate gift = optional.get();
             if (giftCertificate.getName() != null) {
@@ -77,13 +97,13 @@ public class JpaGiftDao implements GiftDao {
             }
             if (giftCertificate.getTags().size() != 0) {
                 giftCertificate.getTags()
-                        .forEach(this::checkExistence);
+                        .forEach(tag -> tagDao.create(tag));
                 gift.getTags().clear();
                 gift.getTags().addAll(giftCertificate.getTags());
             }
             return gift;
         } else {
-            throw new EntityNotFoundException("Requested gift not found");
+            throw new EntityNotFoundException(NOT_FOUND);
         }
     }
 
@@ -103,13 +123,13 @@ public class JpaGiftDao implements GiftDao {
                              CriteriaQuery<GiftCertificate> all,
                              Root<GiftCertificate> root,
                              CriteriaBuilder criteriaBuilder) {
-        Predicate partOfName = criteriaBuilder.like(root.get("name"),
-                "%" + giftSearchFilter.getGiftName() + "%");
-        Predicate partOfDescription = criteriaBuilder.like(root.get("description"),
-                "%" + giftSearchFilter.getGiftDescription() + "%" );
-        Join<GiftCertificate, Tag> tags = root.join("tags", JoinType.LEFT);
+        Predicate partOfName = criteriaBuilder.like(root.get(NAME),
+                PERCENT + giftSearchFilter.getGiftName() + PERCENT);
+        Predicate partOfDescription = criteriaBuilder.like(root.get(DESCRIPTION),
+                PERCENT + giftSearchFilter.getGiftDescription() + PERCENT );
+        Join<GiftCertificate, Tag> tags = root.join(TAGS, JoinType.LEFT);
         Predicate tag = criteriaBuilder.and(
-                criteriaBuilder.equal(tags.get("name"), giftSearchFilter.getTag()));
+                criteriaBuilder.equal(tags.get(NAME), giftSearchFilter.getTag()));
 
         if (giftSearchFilter.getGiftName() != null) {
             if (giftSearchFilter.getGiftDescription() != null) {
@@ -167,34 +187,20 @@ public class JpaGiftDao implements GiftDao {
 
         if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO) {
             if (giftSearchFilter.getGiftsByNameOrder() == QueryOrder.ASC) {
-                orderList.add(criteriaBuilder.asc(root.get("name")));
+                orderList.add(criteriaBuilder.asc(root.get(NAME)));
             } else {
-                orderList.add(criteriaBuilder.desc(root.get("name")));
+                orderList.add(criteriaBuilder.desc(root.get(NAME)));
             }
         }
 
         if (giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
             if (giftSearchFilter.getGiftsByDateOrder() == QueryOrder.ASC) {
-                orderList.add(criteriaBuilder.asc(root.get("createDate")));
+                orderList.add(criteriaBuilder.asc(root.get(CREATE_DATE)));
             } else {
-                orderList.add(criteriaBuilder.desc(root.get("createDate")));
+                orderList.add(criteriaBuilder.desc(root.get(CREATE_DATE)));
             }
         }
 
         return orderList;
-    }
-
-    private void checkExistence(Tag tag) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
-        Root<Tag> root = criteriaQuery.from(Tag.class);
-        criteriaQuery.where(criteriaBuilder.like(root.get("name"), tag.getName()));
-        List<Tag> list = entityManager.createQuery(criteriaQuery).getResultList();
-
-        if (list.size() != 0) {
-            tag.setId(list.get(0).getId());
-        } else {
-            entityManager.persist(tag);
-        }
     }
 }

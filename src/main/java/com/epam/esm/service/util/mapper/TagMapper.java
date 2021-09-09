@@ -10,7 +10,7 @@ public class TagMapper implements AbstractEntityMapper<TagDto, Tag> {
     @Override
     public Tag toEntity(TagDto tagDto) {
         return Tag.builder()
-                .id(tagDto.getId())
+                .tagId(tagDto.getId())
                 .name(tagDto.getName())
                 .build();
     }
@@ -18,7 +18,7 @@ public class TagMapper implements AbstractEntityMapper<TagDto, Tag> {
     @Override
     public TagDto toDto(Tag tagDao) {
         return TagDto.builder()
-                .id(tagDao.getId())
+                .id(tagDao.getTagId())
                 .name(tagDao.getName())
                 .build();
     }

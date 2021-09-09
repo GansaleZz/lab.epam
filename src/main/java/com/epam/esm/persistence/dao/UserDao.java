@@ -10,4 +10,5 @@ public interface UserDao {
     List<User> findAllEntities();
 
     Optional<User> findEntityById(Long id);
+
 }

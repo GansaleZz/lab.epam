@@ -10,7 +10,6 @@ import com.epam.esm.persistence.util.mapper.GiftMapperDb;
 import com.epam.esm.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -128,12 +127,12 @@ public class JdbcTemplateGiftDao implements GiftDao {
             return preparedStatement;
         }, keyHolder);
 
-        giftCertificate.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        giftCertificate.setGiftId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         giftCertificate.getTags()
                 .forEach(i -> {
                     checkExistence(i);
                     jdbcTemplate
-                            .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getId(),i.getId());
+                            .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getGiftId(),i.getTagId());
                 });
 
         return giftCertificate;
@@ -143,9 +142,9 @@ public class JdbcTemplateGiftDao implements GiftDao {
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
         GiftCertificate giftCertificateUpdated = jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,
-                giftMapper, giftCertificate.getId() ).stream()
+                giftMapper, giftCertificate.getGiftId() ).stream()
                 .findAny()
-                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificate.getId())));
+                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificate.getGiftId())));
 
         if (giftCertificate.getName() != null) {
             giftCertificateUpdated.setName(giftCertificate.getName());
@@ -164,15 +163,15 @@ public class JdbcTemplateGiftDao implements GiftDao {
                 giftCertificateUpdated.getDescription(), giftCertificateUpdated.getPrice(),
                 giftCertificateUpdated.getDuration().toDays(),
                 Date.valueOf(LocalDateTime.now().toLocalDate()),
-                giftCertificateUpdated.getId());
+                giftCertificateUpdated.getGiftId());
         if (giftCertificate.getTags() != null) {
             if (!giftCertificate.getTags().isEmpty()) {
-                jdbcTemplate.update(SQL_DELETE_GIFT_TAGS, giftCertificate.getId());
+                jdbcTemplate.update(SQL_DELETE_GIFT_TAGS, giftCertificate.getGiftId());
                 giftCertificate.getTags()
                         .forEach(i -> {
                             checkExistence(i);
                             jdbcTemplate.update(SQL_INSERT_GIFT_TAGS,
-                                    giftCertificate.getId(), i.getId());
+                                    giftCertificate.getGiftId(), i.getTagId());
                         });
                 giftCertificateUpdated.setTags(giftCertificate.getTags());
             }
@@ -187,8 +186,8 @@ public class JdbcTemplateGiftDao implements GiftDao {
     }
 
     private void checkExistence(Tag tag) {
-        if (tag.getId() == null && tag.getName() != null) {
-            tag.setId(jdbcTemplateTagDao.create(tag).getId());
+        if (tag.getTagId() == null && tag.getName() != null) {
+            tag.setTagId(jdbcTemplateTagDao.create(tag).getTagId());
         }
     }
 

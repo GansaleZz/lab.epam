@@ -10,19 +10,25 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tag")
+@Table(name = "user_order")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Tag {
-    @Id
-    @GeneratedValue
-    @Column(name = "tag_id")
-    private Long tagId;
+public class Order {
 
-    @Column(name = "name")
-    private String name;
+    @Id
+    @Column(name = "order_id")
+    @GeneratedValue
+    private Long orderId;
+
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
+
+    @Column(name = "cost")
+    private BigDecimal cost;
 }

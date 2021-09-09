@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -141,7 +142,7 @@ class GiftControllerTest {
         try {
             String name = "Just for test";
             String description = "Description for test";
-            double price = 100;
+            BigDecimal price = BigDecimal.valueOf(100L);
             Duration duration = Duration.ofDays(200);
             GiftCertificateDto giftCertificateDto = GiftCertificateDto
                     .builder()

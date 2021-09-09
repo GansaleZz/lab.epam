@@ -20,6 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -176,7 +177,7 @@ class JdbcTemplateGiftDaoImplTest {
         Optional<GiftCertificate> giftCertificateDao = jdbcTemplateGiftDao.findEntityById(id);
 
         assertTrue(giftCertificateDao.isPresent());
-        assertEquals(id, giftCertificateDao.get().getId());
+        assertEquals(id, giftCertificateDao.get().getGiftId());
     }
 
     @Test
@@ -193,14 +194,14 @@ class JdbcTemplateGiftDaoImplTest {
                     .name("Simple test")
                     .description("Only for test")
                     .duration(Duration.ofDays(1))
-                    .price(1.0)
+                    .price(BigDecimal.ONE)
                     .build();
 
             GiftCertificate giftCertificate = jdbcTemplateGiftDao.create(giftCertificateDao);
             giftCertificateDao.setCreateDate(giftCertificate.getCreateDate().toLocalDate().atStartOfDay());
             giftCertificateDao.setLastUpdateDate(giftCertificate.getLastUpdateDate().toLocalDate().atStartOfDay());
 
-            assertEquals(giftCertificateDao, jdbcTemplateGiftDao.findEntityById(giftCertificate.getId()).get());
+            assertEquals(giftCertificateDao, jdbcTemplateGiftDao.findEntityById(giftCertificate.getGiftId()).get());
     }
 
     @Test
@@ -222,7 +223,7 @@ class JdbcTemplateGiftDaoImplTest {
         jdbcTemplateGiftDao.update(giftCertificateDao);
 
         assertEquals(giftCertificateDao.getName(), jdbcTemplateGiftDao
-                .findEntityById(giftCertificateDao.getId())
+                .findEntityById(giftCertificateDao.getGiftId())
                 .get()
                 .getName());
     }

@@ -18,7 +18,7 @@ public class TagMapperDb implements RowMapper<Tag> {
     @Override
     public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
         return Tag.builder()
-                .id(rs.getLong("tag_id"))
+                .tagId(rs.getLong("tag_id"))
                 .name(rs.getString("tag_name"))
                 .build();
     }

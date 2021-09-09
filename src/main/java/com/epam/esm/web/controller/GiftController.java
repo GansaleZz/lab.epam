@@ -1,5 +1,6 @@
 package com.epam.esm.web.controller;
 
+import com.epam.esm.persistence.dao.OrderDao;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.gift.GiftService;
@@ -26,6 +27,9 @@ import java.util.List;
 public class GiftController {
     private final GiftService giftService;
     private final static String BAD_INPUT = "Please enter correct details for ";
+
+    @Autowired
+    private OrderDao orderDao;
 
     @Autowired
     public GiftController(GiftService giftService) {
@@ -58,6 +62,9 @@ public class GiftController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<GiftCertificateDto> giftById(@PathVariable("id") Long id) throws EntityNotFoundException {
         GiftCertificateDto giftCertificateDto = giftService.findGiftById(id);
+
+        System.out.println(orderDao.findOrdersByUserId(1L));
+//        System.out.println(orderDao.findOrdersByUserId(2L));
         return new ResponseEntity<>(giftCertificateDto, HttpStatus.OK);
     }
 

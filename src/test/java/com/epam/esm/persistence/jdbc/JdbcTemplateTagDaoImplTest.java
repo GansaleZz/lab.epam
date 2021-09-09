@@ -54,7 +54,7 @@ class JdbcTemplateTagDaoImplTest {
         Optional<Tag> tagDao = jdbcTemplateTagDao.findEntityById(id);
 
         assertTrue(tagDao.isPresent());
-        assertEquals(id, tagDao.get().getId());
+        assertEquals(id, tagDao.get().getTagId());
     }
 
     @Test
@@ -73,9 +73,9 @@ class JdbcTemplateTagDaoImplTest {
         Tag tagDaoResult = jdbcTemplateTagDao.create(tagDao);
 
         assertEquals(7, jdbcTemplateTagDao.findAllEntities().size());
-        assertTrue(jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).isPresent());
+        assertTrue(jdbcTemplateTagDao.findEntityById(tagDaoResult.getTagId()).isPresent());
         assertEquals(tagDao.getName(),
-                jdbcTemplateTagDao.findEntityById(tagDaoResult.getId()).get().getName());
+                jdbcTemplateTagDao.findEntityById(tagDaoResult.getTagId()).get().getName());
     }
 
     @Test

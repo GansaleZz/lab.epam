@@ -5,7 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -22,7 +30,7 @@ public class GiftCertificate {
     @Id
     @Column(name = "gift_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long giftId;
 
     @Column(name = "name")
     private String name;
@@ -44,8 +52,10 @@ public class GiftCertificate {
 
     @Builder.Default
     @ManyToMany
-    @JoinTable(name = "gift_tags",
-        joinColumns = @JoinColumn(name = "gift_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JoinTable(
+            name = "gift_tags",
+            joinColumns = @JoinColumn(name = "gift_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> tags = new ArrayList<>();
 }

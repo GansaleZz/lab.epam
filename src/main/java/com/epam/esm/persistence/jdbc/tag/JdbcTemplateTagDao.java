@@ -5,7 +5,6 @@ import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -63,7 +62,7 @@ public class JdbcTemplateTagDao implements TagDao {
                 return preparedStatement;
             }, keyHolder);
 
-            tag.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+            tag.setTagId(Objects.requireNonNull(keyHolder.getKey()).longValue());
             return tag;
         }
     }

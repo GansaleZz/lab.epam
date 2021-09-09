@@ -33,7 +33,7 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
         while (rs.next()) {
             GiftCertificate giftCertificate = map.getOrDefault(rs.getLong("gift_id"),
                     GiftCertificate.builder()
-                            .id(rs.getLong("gift_id"))
+                            .giftId(rs.getLong("gift_id"))
                             .name(rs.getString("name"))
                             .description(rs.getString("description"))
                             .price(rs.getBigDecimal("price"))
@@ -41,10 +41,10 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
                             .createDate(convertToLocalDateTime(rs.getDate("create_date")))
                             .lastUpdateDate(convertToLocalDateTime(rs.getDate("last_update_date")))
                             .build());
-            map.putIfAbsent(giftCertificate.getId(), giftCertificate);
+            map.putIfAbsent(giftCertificate.getGiftId(), giftCertificate);
 
             Tag tag = tagMapperDb.mapRow(rs, rs.getRow());
-            if (tag.getId() != 0) {
+            if (tag.getTagId() != 0) {
                 giftCertificate.getTags().add(tag);
             }
         }
