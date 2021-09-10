@@ -29,9 +29,6 @@ public class GiftController {
     private final static String BAD_INPUT = "Please enter correct details for ";
 
     @Autowired
-    private OrderDao orderDao;
-
-    @Autowired
     public GiftController(GiftService giftService) {
         this.giftService = giftService;
     }
@@ -63,8 +60,6 @@ public class GiftController {
     public ResponseEntity<GiftCertificateDto> giftById(@PathVariable("id") Long id) throws EntityNotFoundException {
         GiftCertificateDto giftCertificateDto = giftService.findGiftById(id);
 
-        System.out.println(orderDao.findOrdersByUserId(1L));
-//        System.out.println(orderDao.findOrdersByUserId(2L));
         return new ResponseEntity<>(giftCertificateDto, HttpStatus.OK);
     }
 

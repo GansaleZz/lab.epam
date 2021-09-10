@@ -1,24 +1,15 @@
 package com.epam.esm.persistence.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "user")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -28,12 +19,7 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @OneToMany
+    @OneToMany(mappedBy = "usersOrder", fetch= FetchType.LAZY)
     @Builder.Default
-    @JoinTable(
-            name = "user_orders",
-            joinColumns =  @JoinColumn(name = "user_id"),
-            inverseJoinColumns =  @JoinColumn(name = "order_id")
-    )
     List<Order> orders = new ArrayList<>();
 }

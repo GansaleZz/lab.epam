@@ -48,11 +48,12 @@ public class JpaGiftDao implements GiftDao {
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
                 .createQuery(GiftCertificate.class);
         Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-        CriteriaQuery<GiftCertificate> allGifts = criteriaQuery.select(root);
+        criteriaQuery.select(root);
 
-        whereClause(giftSearchFilter, allGifts, root, criteriaBuilder);
-        allGifts.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
-        return entityManager.createQuery(allGifts).getResultList();
+        whereClause(giftSearchFilter, criteriaQuery, root, criteriaBuilder);
+        criteriaQuery.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
+
+        return entityManager.createQuery(criteriaQuery).getResultList();
     }
 
     @Override
@@ -60,10 +61,11 @@ public class JpaGiftDao implements GiftDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
         Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-        CriteriaQuery<GiftCertificate> giftCertificate = criteriaQuery.select(root);
-        giftCertificate.where(criteriaBuilder.equal(root.get(ID), id));
+        criteriaQuery.select(root);
 
-        return entityManager.createQuery(giftCertificate).getResultList().stream().findAny();
+        criteriaQuery.where(criteriaBuilder.equal(root.get(ID), id));
+
+        return entityManager.createQuery(criteriaQuery).getResultList().stream().findAny();
     }
 
     @Override
@@ -111,12 +113,8 @@ public class JpaGiftDao implements GiftDao {
     @Transactional
     public boolean delete(Long id) {
         Optional<GiftCertificate> giftCertificate = findEntityById(id);
-        if (giftCertificate.isPresent()) {
-            entityManager.remove(giftCertificate.get());
-            return true;
-        } else {
-            return false;
-        }
+        giftCertificate.ifPresent(certificate -> entityManager.remove(certificate));
+        return true;
     }
 
     private void whereClause(GiftSearchFilter giftSearchFilter,

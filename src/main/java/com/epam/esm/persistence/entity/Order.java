@@ -1,21 +1,16 @@
 package com.epam.esm.persistence.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_order")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,4 +26,9 @@ public class Order {
 
     @Column(name = "cost")
     private BigDecimal cost;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name="user_id")
+    private User usersOrder;
 }

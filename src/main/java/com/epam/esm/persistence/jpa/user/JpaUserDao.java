@@ -16,6 +16,8 @@ import java.util.Optional;
 @Repository
 public class JpaUserDao implements UserDao {
 
+    private static final String USER_ID = "userId";
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -24,6 +26,7 @@ public class JpaUserDao implements UserDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
+        criteriaQuery.select(root);
 
         return entityManager.createQuery(criteriaQuery.select(root)).getResultList();
     }
@@ -33,9 +36,9 @@ public class JpaUserDao implements UserDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
-        Predicate predicate = criteriaBuilder.and(criteriaBuilder
-                .equal(root.get("userId"), id));
-        criteriaQuery.where(predicate);
+        criteriaQuery.select(root);
+        criteriaQuery.where(criteriaBuilder.and(criteriaBuilder
+                .equal(root.get(USER_ID), id)));
 
         return entityManager.createQuery(criteriaQuery)
                 .getResultList()

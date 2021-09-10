@@ -9,7 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -19,52 +18,34 @@ import java.util.Optional;
 public class JpaOrderDao implements OrderDao {
 
     private static final String ID = "id";
-    private static final String ORDERS = "orders";
-    private static final String USER_ID = "userId";
+    private static final String USERS_ORDER = "usersOrder";
+    private static final String EMPTY_STRING = "";
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     public List<Order> findAllOrders() {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Order> criteriaQuery = criteriaBuilder.createQuery(Order.class);
-        Root<Order> root = criteriaQuery.from(Order.class);
-        CriteriaQuery<Order> allOrders = criteriaQuery.select(root);
-
-        return entityManager.createQuery(allOrders).getResultList();
+        return entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
+                .getResultList();
     }
 
     @Override
     public Optional<Order> findOrderById(Long id) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Order> criteriaQuery = criteriaBuilder.createQuery(Order.class);
-        Root<Order> root = criteriaQuery.from(Order.class);
-        CriteriaQuery<Order> order = criteriaQuery.select(root);
-        order.where(criteriaBuilder.equal(root.get(ID), id));
-
-        return entityManager.createQuery(order).getResultList().stream().findAny();
+        return entityManager.createQuery(createQueryByParam(ID, id))
+                .getResultList().stream().findAny();
     }
 
     @Override
     public List<Order> findOrdersByUserId(Long id) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery criteriaQuery = criteriaBuilder.createQuery(User.class);
-        Root<User> rootUser = criteriaQuery.from(User.class);
-
-        Predicate predicate = criteriaBuilder.and(criteriaBuilder
-                .equal(rootUser.get(USER_ID), id));
-
-        criteriaQuery.select(rootUser.get(ORDERS));
-        criteriaQuery.where(predicate);
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        return entityManager.createQuery(createQueryByParam(USERS_ORDER, id))
+                .getResultList();
     }
 
     @Override
     @Transactional
     public Order create(Order order, User user) {
         entityManager.persist(order);
-
         user.getOrders().add(order);
         entityManager.merge(user);
         return order;
@@ -74,11 +55,21 @@ public class JpaOrderDao implements OrderDao {
     @Transactional
     public boolean delete(Long id) {
         Optional<Order> order = findOrderById(id);
-        if (order.isPresent()) {
-            entityManager.remove(order.get());
-            return true;
-        } else {
-            return false;
+        order.ifPresent(value -> entityManager.remove(value));
+        return true;
+    }
+
+    private CriteriaQuery<Order> createQueryByParam(String attributeName,
+                                                    Object attributeValue) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> criteriaQuery = criteriaBuilder.createQuery(Order.class);
+        Root<Order> root = criteriaQuery.from(Order.class);
+        criteriaQuery.select(root);
+
+        if (!attributeName.equals(EMPTY_STRING)) {
+            criteriaQuery.where(criteriaBuilder.equal(root.get(attributeName),
+                    attributeValue));
         }
+        return criteriaQuery;
     }
 }
