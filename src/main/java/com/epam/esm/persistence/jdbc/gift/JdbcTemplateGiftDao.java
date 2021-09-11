@@ -193,9 +193,9 @@ public class JdbcTemplateGiftDao implements GiftDao {
 
     private void addTag(GiftSearchFilter giftSearchFilter,
                         StringBuilder queryParams) {
-        if (giftSearchFilter.getTag() != null) {
+        if (giftSearchFilter.getTags().size() != 0) {
             queryParams.append(WHERE);
-            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTag()));
+            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTags()));
         }
     }
 

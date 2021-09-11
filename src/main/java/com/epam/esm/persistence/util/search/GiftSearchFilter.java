@@ -1,11 +1,14 @@
 package com.epam.esm.persistence.util.search;
 
+import com.epam.esm.persistence.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +21,8 @@ public class GiftSearchFilter {
     @Builder.Default
     @NotNull(message = "GiftsByDateOrder should not be null")
     private QueryOrder giftsByDateOrder = QueryOrder.NO;
-    private String tag;
     private String giftName;
     private String giftDescription;
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
 }

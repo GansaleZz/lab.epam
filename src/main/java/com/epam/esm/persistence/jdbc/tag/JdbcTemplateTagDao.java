@@ -2,6 +2,7 @@ package com.epam.esm.persistence.jdbc.tag;
 
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.Tag;
+import com.epam.esm.persistence.entity.User;
 import com.epam.esm.persistence.util.mapper.TagMapperDb;
 import com.epam.esm.util.validation.BaseTagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ public class JdbcTemplateTagDao implements TagDao {
     @Override
     public List<Tag> findAllEntities() {
         return jdbcTemplate.query(SQL_FIND_ALL_TAGS, tagMapper);
+    }
+
+    @Override
+    public Tag findMostWidelyUsedTag(User user) {
+        return null;
     }
 
     @Override

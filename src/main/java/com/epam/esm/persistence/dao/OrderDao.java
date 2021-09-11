@@ -14,7 +14,6 @@ public interface OrderDao {
 
     List<Order> findOrdersByUserId(Long id);
 
-    // user's id
     Order create(Order order, User user);
 
     boolean delete(Long id);

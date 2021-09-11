@@ -1,5 +1,6 @@
 package com.epam.esm.persistence.dao;
 
+import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface UserDao {
 
     Optional<User> findEntityById(Long id);
 
+    Long findUserWithTheHighestCost();
 }
