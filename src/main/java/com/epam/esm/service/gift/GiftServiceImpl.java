@@ -17,17 +17,12 @@ import java.util.stream.Collectors;
 public class GiftServiceImpl implements GiftService{
 
     private static final String NOT_FOUND = "Requested gift not found (id = %s)";
-    private final GiftDao giftDao;
-    private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 
     @Autowired
-    public GiftServiceImpl(GiftDao giftDao,
-                           AbstractEntityMapper<GiftCertificateDto,
-                                   GiftCertificate> giftCertificateMapper) {
-        this.giftDao = giftDao;
-        this.giftMapper = giftCertificateMapper;
-    }
+    private GiftDao giftDao;
 
+    @Autowired
+    private AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 
     @Override
     public List<GiftCertificateDto> findAllGifts(GiftSearchFilter giftSearchFilter) {

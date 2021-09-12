@@ -1,7 +1,7 @@
-package com.epam.esm.util.validation.entity;
+package com.epam.esm.persistence.jdbc.util.validation.entity;
 
 import com.epam.esm.persistence.entity.Tag;
-import com.epam.esm.util.validation.BaseTagValidator;
+import com.epam.esm.persistence.jdbc.util.validation.BaseTagValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import org.springframework.stereotype.Component;
 

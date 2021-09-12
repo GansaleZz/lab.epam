@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class TagDto {
+
     private Long id;
 
     @NotBlank(message = "Name should not be empty")

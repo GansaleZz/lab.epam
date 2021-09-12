@@ -1,5 +1,6 @@
 package com.epam.esm.persistence.dao;
 
+import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
 
@@ -14,7 +15,7 @@ public interface OrderDao {
 
     List<Order> findOrdersByUserId(Long id);
 
-    Order create(Order order, User user);
+    Order create(GiftCertificate giftCertificate, User user);
 
     boolean delete(Long id);
 }

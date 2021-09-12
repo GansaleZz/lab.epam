@@ -24,6 +24,7 @@ public class JpaTagDao implements TagDao {
 
     private static final String NAME = "name";
     private static final String TAG_ID = "tagId";
+    private static final String USER_ID = "userId";
     private static final String EMPTY_STRING = "";
     private static final String GIFT_CERTIFICATE = "giftCertificate";
     private static final String TAGS = "tags";
@@ -39,15 +40,17 @@ public class JpaTagDao implements TagDao {
     }
 
     @Override
-    public Tag findMostWidelyUsedTag(User user) {
+    public Tag findMostWidelyUsedTag(Long id) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
         Root<User> root = criteriaQuery.from(User.class);
-        Join<Order, User> join = root.join(ORDERS, JoinType.LEFT);
+        Join<Object, Object> join = root.join(ORDERS, JoinType.INNER)
+                .on(criteriaBuilder.equal(root.get(USER_ID), id));
         Join<GiftCertificate, Order> joinGift = join
                 .join(GIFT_CERTIFICATE, JoinType.LEFT);
         Join<GiftCertificate, Tag> joinTag = joinGift
                 .join(TAGS, JoinType.LEFT);
+
         criteriaQuery.multiselect(joinTag.get(TAG_ID),
                 criteriaBuilder.count(joinTag.get(NAME)))
                 .groupBy(joinTag.get(TAG_ID))

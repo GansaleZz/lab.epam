@@ -1,9 +1,19 @@
 package com.epam.esm.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -14,29 +24,25 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class Order {
 
     @Id
     @Column(name = "order_id")
     @GeneratedValue
-    @NonNull
     private Long orderId;
 
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
 
     @Column(name = "cost")
-    @NonNull
     private BigDecimal cost;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "gift_id")
     private GiftCertificate giftCertificate;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name="user_id")
+    @JsonIgnore
     private User usersOrder;
 }

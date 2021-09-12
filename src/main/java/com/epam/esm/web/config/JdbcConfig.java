@@ -12,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
         "com.epam.esm.persistence.util.*",
         "com.epam.esm.service.*",
         "com.epam.esm.web.controller",
-        "com.epam.esm.web.exception",
-        "com.epam.esm.util.*"
+        "com.epam.esm.web.exception"
 })
 public class JdbcConfig {
     private ApplicationContext applicationContext;

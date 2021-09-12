@@ -19,6 +19,8 @@ public interface TagService {
      */
     TagDto findTagById(Long id);
 
+    TagDto findMostWidelyUsedTag();
+
     /**
      * Creating tag on db.
      * @param tagDto - tag which we want create.

@@ -22,12 +22,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/tags")
 public class TagController {
-    private final TagService tagService;
 
     @Autowired
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
-    }
+    private TagService tagService;
 
     /**
      * Extracts all tags from bd.
@@ -49,6 +46,11 @@ public class TagController {
         TagDto tag = tagService.findTagById(id);
 
         return new ResponseEntity<>(tag, HttpStatus.OK);
+    }
+
+    @GetMapping("/mostWiledUsedTag")
+    public ResponseEntity<TagDto> mostWiledUsedTag() {
+        return new ResponseEntity<>(tagService.findMostWidelyUsedTag(), HttpStatus.OK);
     }
 
     /**

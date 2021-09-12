@@ -33,6 +33,7 @@ public class GiftCertificateDto {
     private Duration duration;
 
     private LocalDateTime createDate;
+
     private LocalDateTime lastUpdateDate;
 
     @Builder.Default

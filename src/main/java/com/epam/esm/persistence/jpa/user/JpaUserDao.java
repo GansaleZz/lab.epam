@@ -58,9 +58,10 @@ public class JpaUserDao implements UserDao {
         Root<Order> root = criteriaQuery.from(Order.class);
         Join<Order, User> join = root.join(USERS_ORDER, JoinType.LEFT);
 
-        criteriaQuery.multiselect( join.get(USER_ID), criteriaBuilder.sum(root.get(COST)))
+        criteriaQuery.multiselect( join.get(USER_ID),
+                criteriaBuilder.sum(root.get(COST)))
             .groupBy(join.get(USER_ID))
-            .orderBy(criteriaBuilder.asc(criteriaBuilder.sum(root.get(COST))));
+            .orderBy(criteriaBuilder.desc(criteriaBuilder.sum(root.get(COST))));
 
         return (Long) Arrays.stream(entityManager.createQuery(criteriaQuery)
                 .getResultList()

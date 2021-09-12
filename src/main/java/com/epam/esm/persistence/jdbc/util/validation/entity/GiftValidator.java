@@ -1,8 +1,8 @@
-package com.epam.esm.util.validation.entity;
+package com.epam.esm.persistence.jdbc.util.validation.entity;
 
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
-import com.epam.esm.util.validation.BaseGiftValidator;
+import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
 import com.epam.esm.web.exception.EntityBadInputException;
 import org.springframework.stereotype.Component;
 

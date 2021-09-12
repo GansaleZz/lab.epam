@@ -1,4 +1,4 @@
-package com.epam.esm.util.validation;
+package com.epam.esm.persistence.jdbc.util.validation;
 
 
 import com.epam.esm.web.exception.EntityBadInputException;

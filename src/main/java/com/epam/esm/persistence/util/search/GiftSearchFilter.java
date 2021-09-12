@@ -18,11 +18,15 @@ public class GiftSearchFilter {
     @Builder.Default
     @NotNull(message = "GiftsByNameOrder should not be null")
     private QueryOrder giftsByNameOrder = QueryOrder.NO;
+
     @Builder.Default
     @NotNull(message = "GiftsByDateOrder should not be null")
     private QueryOrder giftsByDateOrder = QueryOrder.NO;
+
     private String giftName;
+
     private String giftDescription;
+
     @Builder.Default
     private List<String> tags = new ArrayList<>();
 }

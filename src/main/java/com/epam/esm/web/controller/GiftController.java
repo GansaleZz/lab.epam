@@ -1,48 +1,67 @@
 package com.epam.esm.web.controller;
 
-import com.epam.esm.persistence.dao.OrderDao;
-import com.epam.esm.persistence.dao.TagDao;
-import com.epam.esm.persistence.dao.UserDao;
-import com.epam.esm.persistence.entity.User;
 import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.gift.GiftService;
 import com.epam.esm.web.exception.EntityBadInputException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/gifts")
 public class GiftController {
-    private final GiftService giftService;
+
     private final static String BAD_INPUT = "Please enter correct details for ";
 
     @Autowired
-    public GiftController(GiftService giftService) {
-        this.giftService = giftService;
-    }
+    private GiftService giftService;
 
     /**
      * Extracts all gift certificates from bd.
      * @return found list of gift certificates on JSON format.
      * @throws EntityBadInputException if one of filters fields is incorrect.
      */
-    @GetMapping()
-    public ResponseEntity<List<GiftCertificateDto>> listOfGifts(@Valid GiftSearchFilter giftSearchFilter,
+    @GetMapping
+    public ResponseEntity<List<?>> listOfGifts(@Valid GiftSearchFilter giftSearchFilter,
                                                                 BindingResult bindingResult)
             throws EntityBadInputException {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
 
-        return new ResponseEntity<>(giftService.findAllGifts(giftSearchFilter), HttpStatus.OK);
+        ResponseEntity<List<GiftCertificateDto>> responseEntity =
+                new ResponseEntity<>(giftService.findAllGifts(giftSearchFilter),
+                        HttpStatus.OK);
+        List<GiftCertificateDto> list = responseEntity.getBody();
+        List<EntityModel<GiftCertificateDto>> model = list.stream()
+                .map(EntityModel::of).collect(Collectors.toList());
+
+        model.forEach(
+                gift -> gift.add(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder
+                        .methodOn(this.getClass())
+                        .giftById(gift.getContent().getId()))
+                        .withRel("href"))
+        );
+
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
@@ -52,10 +71,22 @@ public class GiftController {
      * @throws EntityNotFoundException if gift certificate does not exist.
      */
     @GetMapping(value = "/{id}")
-    public ResponseEntity<GiftCertificateDto> giftById(@PathVariable("id") Long id) throws EntityNotFoundException {
-        GiftCertificateDto giftCertificateDto = giftService.findGiftById(id);
+    public ResponseEntity<?> giftById(@PathVariable("id") Long id)
+            throws EntityNotFoundException {
+        ResponseEntity<GiftCertificateDto> responseEntity =
+                new ResponseEntity<>(giftService.findGiftById(id), HttpStatus.OK);
+        GiftCertificateDto giftCertificateDto = responseEntity.getBody();
 
-        return new ResponseEntity<>(giftCertificateDto, HttpStatus.OK);
+        EntityModel<GiftCertificateDto> model = EntityModel.of(giftCertificateDto);
+        model.add(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder
+                        .methodOn(this.getClass()).delete(id)).withRel("delete"));
+//        model.add(WebMvcLinkBuilder
+//                .linkTo(WebMvcLinkBuilder
+//                        .methodOn(OrderController.class)
+//                        .create()
+//                        .withRel()))
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**

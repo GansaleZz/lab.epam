@@ -1,4 +1,4 @@
-package com.epam.esm.persistence.util.mapper;
+package com.epam.esm.persistence.jdbc.util.mapper;
 
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Tag;
@@ -19,6 +19,15 @@ import java.util.Map;
 
 @Component
 public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
+
+    private static final String GIFT_ID = "gift_id";
+    private static final String NAME = "name";
+    private static final String DESCRIPTION = "description";
+    private static final String PRICE = "price";
+    private static final String DURATION = "duration";
+    private static final String CREATE_DATE = "create_date";
+    private static final String LAST_UPDATE_DATE = "last_update_date";
+
     @Autowired
     private TagMapperDb tagMapperDb;
 
@@ -31,15 +40,15 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
     public List<GiftCertificate> extractData(ResultSet rs) throws SQLException, DataAccessException {
         Map<Long, GiftCertificate> map = new LinkedHashMap<>();
         while (rs.next()) {
-            GiftCertificate giftCertificate = map.getOrDefault(rs.getLong("gift_id"),
+            GiftCertificate giftCertificate = map.getOrDefault(rs.getLong(GIFT_ID),
                     GiftCertificate.builder()
-                            .giftId(rs.getLong("gift_id"))
-                            .name(rs.getString("name"))
-                            .description(rs.getString("description"))
-                            .price(rs.getBigDecimal("price"))
-                            .duration(Duration.ofDays(rs.getLong("duration")))
-                            .createDate(convertToLocalDateTime(rs.getDate("create_date")))
-                            .lastUpdateDate(convertToLocalDateTime(rs.getDate("last_update_date")))
+                            .giftId(rs.getLong(GIFT_ID))
+                            .name(rs.getString(NAME))
+                            .description(rs.getString(DESCRIPTION))
+                            .price(rs.getBigDecimal(PRICE))
+                            .duration(Duration.ofDays(rs.getLong(DURATION)))
+                            .createDate(convertToLocalDateTime(rs.getDate(CREATE_DATE)))
+                            .lastUpdateDate(convertToLocalDateTime(rs.getDate(LAST_UPDATE_DATE)))
                             .build());
             map.putIfAbsent(giftCertificate.getGiftId(), giftCertificate);
 

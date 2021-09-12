@@ -1,6 +1,7 @@
 package com.epam.esm.persistence.jpa.order;
 
 import com.epam.esm.persistence.dao.OrderDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
 import org.springframework.stereotype.Repository;
@@ -11,13 +12,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class JpaOrderDao implements OrderDao {
 
-    private static final String ID = "id";
+    private static final String ORDER_ID = "orderId";
     private static final String USERS_ORDER = "usersOrder";
     private static final String EMPTY_STRING = "";
 
@@ -32,7 +34,7 @@ public class JpaOrderDao implements OrderDao {
 
     @Override
     public Optional<Order> findOrderById(Long id) {
-        return entityManager.createQuery(createQueryByParam(ID, id))
+        return entityManager.createQuery(createQueryByParam(ORDER_ID, id))
                 .getResultList().stream().findAny();
     }
 
@@ -44,10 +46,18 @@ public class JpaOrderDao implements OrderDao {
 
     @Override
     @Transactional
-    public Order create(Order order, User user) {
+    public Order create(GiftCertificate giftCertificate, User user) {
+        Order order = Order.builder()
+                .usersOrder(user)
+                .cost(giftCertificate.getPrice())
+                .timestamp(LocalDateTime.now())
+                .giftCertificate(giftCertificate)
+                .build();
+
         entityManager.persist(order);
         user.getOrders().add(order);
         entityManager.merge(user);
+
         return order;
     }
 
@@ -55,7 +65,9 @@ public class JpaOrderDao implements OrderDao {
     @Transactional
     public boolean delete(Long id) {
         Optional<Order> order = findOrderById(id);
+
         order.ifPresent(value -> entityManager.remove(value));
+
         return true;
     }
 
@@ -70,6 +82,7 @@ public class JpaOrderDao implements OrderDao {
             criteriaQuery.where(criteriaBuilder.equal(root.get(attributeName),
                     attributeValue));
         }
+
         return criteriaQuery;
     }
 }

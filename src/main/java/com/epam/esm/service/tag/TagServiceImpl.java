@@ -1,6 +1,7 @@
 package com.epam.esm.service.tag;
 
 import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
@@ -15,15 +16,15 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
 
     private static final String NOT_FOUND_BY_ID = "Requested tag not found (id = %s)";
-    private final TagDao tagDao;
-    private final AbstractEntityMapper<TagDto, Tag> tagMapper;
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao,
-                          AbstractEntityMapper<TagDto, Tag> tagMapper) {
-        this.tagDao = tagDao;
-        this.tagMapper = tagMapper;
-    }
+    private TagDao tagDao;
+
+    @Autowired
+    private UserDao userDao;
+
+    @Autowired
+    private AbstractEntityMapper<TagDto, Tag> tagMapper;
 
     @Override
     public List<TagDto> findAllTags() {
@@ -37,7 +38,15 @@ public class TagServiceImpl implements TagService {
     public TagDto findTagById(Long id) {
          return tagDao.findEntityById(id)
                  .map(tagMapper::toDto)
-                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID, id)));
+                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
+                         id)));
+    }
+
+    @Override
+    public TagDto findMostWidelyUsedTag() {
+        return tagMapper.toDto(tagDao
+                .findMostWidelyUsedTag(userDao
+                        .findUserWithTheHighestCost()));
     }
 
     @Override

@@ -14,5 +14,5 @@ public interface TagDao extends BaseDao<Long, Tag> {
     List<Tag> findAllEntities();
 
 
-    Tag findMostWidelyUsedTag(User user);
+    Tag findMostWidelyUsedTag(Long id);
 }
