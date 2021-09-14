@@ -9,13 +9,9 @@ import java.util.Optional;
 
 public interface OrderDao {
 
-    List<Order> findAllOrders();
-
     Optional<Order> findOrderById(Long id);
 
     List<Order> findOrdersByUserId(Long id);
 
     Order create(GiftCertificate giftCertificate, User user);
-
-    boolean delete(Long id);
 }

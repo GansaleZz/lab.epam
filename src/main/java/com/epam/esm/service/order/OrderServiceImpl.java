@@ -36,14 +36,6 @@ public class OrderServiceImpl implements OrderService{
     private AbstractEntityMapper<OrderDto, Order> orderMapper;
 
     @Override
-    public List<OrderDto> findAllOrders() {
-        return orderDao.findAllOrders()
-                .stream()
-                .map(orderMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public OrderDto findOrderById(Long id) {
         return orderDao.findOrderById(id)
                 .map(orderMapper::toDto)
@@ -70,10 +62,5 @@ public class OrderServiceImpl implements OrderService{
                 user.orElseThrow(() ->
                         new EntityNotFoundException(String.format(USER_NOT_FOUND, userId)))
         ));
-    }
-
-    @Override
-    public boolean delete(Long id) {
-        return orderDao.delete(id);
     }
 }

@@ -25,11 +25,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/gifts")
+@RequestMapping("/gift-certificates")
 public class GiftController {
 
     private final static String BAD_INPUT = "Please enter correct details for ";
-
     @Autowired
     private GiftService giftService;
 
@@ -81,11 +80,6 @@ public class GiftController {
         model.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder
                         .methodOn(this.getClass()).delete(id)).withRel("delete"));
-//        model.add(WebMvcLinkBuilder
-//                .linkTo(WebMvcLinkBuilder
-//                        .methodOn(OrderController.class)
-//                        .create()
-//                        .withRel()))
         return new ResponseEntity<>(model, HttpStatus.OK);
     }
 

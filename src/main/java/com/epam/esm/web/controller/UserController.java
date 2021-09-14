@@ -1,6 +1,5 @@
 package com.epam.esm.web.controller;
 
-import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.dto.UserDto;
 import com.epam.esm.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,11 +21,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/users")
 public class UserController {
 
+    private static final String ORDERS = "orders";
+    private static final String USERS = "users";
+    private static final String USER = "user";
+
     @Autowired
     private UserService userService;
 
     @GetMapping()
-    public ResponseEntity<List<?>> listOfUsers() {
+    public ResponseEntity<?> listOfUsers() {
         ResponseEntity<List<UserDto>> responseEntity =
                 new ResponseEntity<>(userService.findAllUsers(),
                         HttpStatus.OK);
@@ -37,14 +38,16 @@ public class UserController {
                 .map(EntityModel::of).collect(Collectors.toList());
 
         model.forEach(
-                gift -> gift.add(WebMvcLinkBuilder
+                user -> user.add(WebMvcLinkBuilder
                         .linkTo(WebMvcLinkBuilder
                                 .methodOn(this.getClass())
-                                .userById(gift.getContent().getId()))
-                        .withRel("href"))
+                                .userById(user.getContent().getId()))
+                        .withRel(USER))
         );
-
-        return new ResponseEntity<>(model, HttpStatus.OK);
+        CollectionModel<EntityModel<UserDto>> result = CollectionModel.of(model);
+        result.add(WebMvcLinkBuilder.linkTo(this.getClass())
+                .withSelfRel());
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -52,12 +55,20 @@ public class UserController {
         ResponseEntity<UserDto> responseEntity =
                 new ResponseEntity<>(userService.findUserById(id), HttpStatus.OK);
         UserDto userDto = responseEntity.getBody();
-
         EntityModel<UserDto> model = EntityModel.of(userDto);
+
+        Link selfRel = WebMvcLinkBuilder.linkTo(this.getClass())
+                .slash(id)
+                .withRel(USERS);
+
+        Link usersRel = WebMvcLinkBuilder.linkTo(this.getClass())
+                .withSelfRel();
+
         model.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder
                                 .methodOn(OrderController.class).listOfUserOrders(id))
-                .withRel("orders"));
+                .withRel(ORDERS), selfRel, usersRel);
+
         return new ResponseEntity<>(model, HttpStatus.OK);
     }
 }

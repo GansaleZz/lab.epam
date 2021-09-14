@@ -27,12 +27,6 @@ public class JpaOrderDao implements OrderDao {
     private EntityManager entityManager;
 
     @Override
-    public List<Order> findAllOrders() {
-        return entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
-                .getResultList();
-    }
-
-    @Override
     public Optional<Order> findOrderById(Long id) {
         return entityManager.createQuery(createQueryByParam(ORDER_ID, id))
                 .getResultList().stream().findAny();
@@ -59,16 +53,6 @@ public class JpaOrderDao implements OrderDao {
         entityManager.merge(user);
 
         return order;
-    }
-
-    @Override
-    @Transactional
-    public boolean delete(Long id) {
-        Optional<Order> order = findOrderById(id);
-
-        order.ifPresent(value -> entityManager.remove(value));
-
-        return true;
     }
 
     private CriteriaQuery<Order> createQueryByParam(String attributeName,
