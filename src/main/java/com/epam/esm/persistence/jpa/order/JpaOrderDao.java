@@ -4,6 +4,7 @@ import com.epam.esm.persistence.dao.OrderDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,14 +28,28 @@ public class JpaOrderDao implements OrderDao {
     private EntityManager entityManager;
 
     @Override
-    public Optional<Order> findOrderById(Long id) {
-        return entityManager.createQuery(createQueryByParam(ORDER_ID, id))
-                .getResultList().stream().findAny();
+    public Optional<Order> findOrderById(Long id, Long userId) {
+        Optional<Order> order = entityManager.createQuery(createQueryByParam(ORDER_ID, id))
+                .getResultList()
+                .stream()
+                .findAny();
+        if (order.isPresent() &&
+            order.get().getUsersOrder().getUserId().equals(userId)) {
+            return order;
+        }
+        return Optional.empty();
     }
 
     @Override
-    public List<Order> findOrdersByUserId(Long id) {
+    public List<Order> findOrdersByUserId(PaginationFilter paginationFilter,
+                                          Long id) {
+        paginationFilter.setCount(entityManager
+                .createQuery(createQueryByParam(USERS_ORDER, id))
+                .getResultList().size());
+
         return entityManager.createQuery(createQueryByParam(USERS_ORDER, id))
+                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+                .setMaxResults(paginationFilter.getItems())
                 .getResultList();
     }
 

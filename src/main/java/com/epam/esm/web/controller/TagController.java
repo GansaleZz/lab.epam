@@ -2,9 +2,15 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagService;
-import com.epam.esm.web.exception.EntityBadInputException;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityBadInputException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.link.PaginationEntityLink;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -17,22 +23,84 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tags")
 public class TagController {
 
+    private static final String TAG = "tag";
+    private static final String TAGS = "tags";
+    private static final String LIST_OF_TAGS = "listOfTags";
+    private static final String BAD_INPUT = "Please enter correct details for ";
+    private static final String NO_METHOD = "Method not found";
+    private final TagService tagService;
+    private final PaginationEntityLink paginationTagLink;
+
     @Autowired
-    private TagService tagService;
+    public TagController(TagService tagService, PaginationEntityLink paginationEntityLink) {
+        this.tagService = tagService;
+        this.paginationTagLink = paginationEntityLink;
+    }
 
     /**
      * Extracts all tags from bd.
      * @return list of tags on JSON format.
      */
     @GetMapping
-    public ResponseEntity<List<TagDto>> listOfTags(){
-        return new ResponseEntity<>(tagService.findAllTags(), HttpStatus.OK);
+    public CollectionModel<EntityModel<TagDto>> listOfTags(@Valid PaginationFilter paginationFilter,
+                                                           BindingResult bindingResult) throws NoSuchMethodException {
+        if (bindingResult.hasErrors()) {
+            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+        }
+        List<TagDto> tags = tagService.findAllTags(paginationFilter);
+        List<EntityModel<TagDto>> model = tags.stream()
+                .map(EntityModel::of).collect(Collectors.toList());
+        Method listOfTags = this.getClass().getMethod(LIST_OF_TAGS,
+                PaginationFilter.class,
+                BindingResult.class);
+
+        model.forEach(
+                tag -> {
+                    try {
+                        tag.add(
+                                WebMvcLinkBuilder
+                                        .linkTo(WebMvcLinkBuilder
+                                                .methodOn(this.getClass()).tagById(tag.getContent().getId()))
+                                        .withRel(TAG)
+                                        .withName(tag.getContent().getName())
+                        );
+                    } catch (NoSuchMethodException e) {
+                        throw new RuntimeException(NO_METHOD);
+                    }
+                }
+        );
+
+        CollectionModel<EntityModel<TagDto>> result = CollectionModel.of(model);
+        Link selfLink = WebMvcLinkBuilder.linkTo(
+                WebMvcLinkBuilder.methodOn(this.getClass())
+                        .listOfTags(paginationFilter, bindingResult)
+        )
+                .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
+                        paginationFilter.getPage(),
+                        paginationFilter.getItems()))
+                .withSelfRel();
+        result.add(selfLink);
+
+        if (paginationFilter.getItems() != 0) {
+            paginationTagLink.nextLink(listOfTags, paginationFilter, bindingResult)
+                    .ifPresent(result::add);
+            paginationTagLink.prevLink(listOfTags, paginationFilter, bindingResult)
+                    .ifPresent(result::add);
+            paginationTagLink.firstLink(listOfTags, paginationFilter, bindingResult)
+                    .ifPresent(result::add);
+            paginationTagLink.lastLink(listOfTags, paginationFilter, bindingResult)
+                    .ifPresent(result::add);
+        }
+
+        return result;
     }
 
     /**
@@ -42,15 +110,29 @@ public class TagController {
      * @throws EntityNotFoundException if tag does not exist.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<TagDto> tagById(@PathVariable("id") Long id) throws EntityNotFoundException {
+    public EntityModel<TagDto> tagById(@PathVariable("id") Long id) throws NoSuchMethodException {
         TagDto tag = tagService.findTagById(id);
+        EntityModel<TagDto> model = EntityModel.of(tag);
+        PaginationFilter paginationFilter = PaginationFilter.builder()
+                .page(0)
+                .items(1)
+                .build();
 
-        return new ResponseEntity<>(tag, HttpStatus.OK);
-    }
+        Link selfLink = WebMvcLinkBuilder.linkTo(
+                WebMvcLinkBuilder.methodOn(this.getClass()).tagById(id)
+        )
+                .withSelfRel();
+        Link tagsLink = WebMvcLinkBuilder.linkTo(
+                WebMvcLinkBuilder.methodOn(this.getClass())
+                        .listOfTags(paginationFilter, null)
+        )
+                .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
+                        paginationFilter.getPage(),
+                        paginationFilter.getItems()))
+                .withRel(TAGS);
+        model.add(selfLink, tagsLink);
 
-    @GetMapping("/mostWiledUsedTag")
-    public ResponseEntity<TagDto> mostWiledUsedTag() {
-        return new ResponseEntity<>(tagService.findMostWidelyUsedTag(), HttpStatus.OK);
+        return model;
     }
 
     /**

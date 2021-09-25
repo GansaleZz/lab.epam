@@ -1,12 +1,13 @@
-package com.epam.esm.persistence.jpa.gift;
+package com.epam.esm.persistence.jpa.giftCertificate;
 
-import com.epam.esm.persistence.dao.GiftDao;
+import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Tag;
-import com.epam.esm.persistence.util.search.GiftSearchFilter;
+import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JpaGiftDao implements GiftDao {
+public class JpaGiftCertificateDao implements GiftCertificateDao {
 
     private static final String ID = "giftId";
     private static final String NOT_FOUND = "Requested gift not found";
@@ -39,11 +40,16 @@ public class JpaGiftDao implements GiftDao {
    @PersistenceContext
    private EntityManager entityManager;
 
+   private final TagDao tagDao;
+
    @Autowired
-   private TagDao tagDao;
+    public JpaGiftCertificateDao(TagDao tagDao) {
+        this.tagDao = tagDao;
+    }
 
     @Override
-    public List<GiftCertificate> findAllEntities(GiftSearchFilter giftSearchFilter) {
+    public List<GiftCertificate> findAllEntities(GiftCertificateSearchFilter giftSearchFilter,
+                                                 PaginationFilter paginationFilter) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
                 .createQuery(GiftCertificate.class);
@@ -61,7 +67,13 @@ public class JpaGiftDao implements GiftDao {
         }
         criteriaQuery.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
 
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        paginationFilter.setCount(entityManager.createQuery(criteriaQuery)
+                .getResultList().size());
+
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+                .setMaxResults(paginationFilter.getItems())
+                .getResultList();
     }
 
     @Override
@@ -129,7 +141,7 @@ public class JpaGiftDao implements GiftDao {
         return true;
     }
 
-    private void tagsExists(GiftSearchFilter giftSearchFilter,
+    private void tagsExists(GiftCertificateSearchFilter giftSearchFilter,
                             CriteriaQuery<GiftCertificate> criteriaQuery,
                             Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -140,7 +152,7 @@ public class JpaGiftDao implements GiftDao {
         criteriaQuery.where(in);
     }
 
-    private void partOfNameExists(GiftSearchFilter giftSearchFilter,
+    private void partOfNameExists(GiftCertificateSearchFilter giftSearchFilter,
                                   CriteriaQuery<GiftCertificate> criteriaQuery,
                                   Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -156,7 +168,7 @@ public class JpaGiftDao implements GiftDao {
         }
     }
 
-    private void partOfDescriptionExists(GiftSearchFilter giftSearchFilter,
+    private void partOfDescriptionExists(GiftCertificateSearchFilter giftSearchFilter,
                                          CriteriaQuery<GiftCertificate> criteriaQuery,
                                          Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -172,9 +184,9 @@ public class JpaGiftDao implements GiftDao {
         }
     }
 
-    private List<Order> orderClause(GiftSearchFilter giftSearchFilter,
-                               CriteriaBuilder criteriaBuilder,
-                               Root<GiftCertificate> root) {
+    private List<Order> orderClause(GiftCertificateSearchFilter giftSearchFilter,
+                                    CriteriaBuilder criteriaBuilder,
+                                    Root<GiftCertificate> root) {
         List<Order> orderList = new ArrayList<>();
 
         if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO) {

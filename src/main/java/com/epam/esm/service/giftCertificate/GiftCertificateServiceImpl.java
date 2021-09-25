@@ -1,11 +1,12 @@
-package com.epam.esm.service.gift;
+package com.epam.esm.service.giftCertificate;
 
+import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
-import com.epam.esm.persistence.dao.GiftDao;
-import com.epam.esm.persistence.util.search.GiftSearchFilter;
+import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,19 +15,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class GiftServiceImpl implements GiftService{
+public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private static final String NOT_FOUND = "Requested gift not found (id = %s)";
+    private final GiftCertificateDao giftDao;
+    private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 
     @Autowired
-    private GiftDao giftDao;
-
-    @Autowired
-    private AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
+    public GiftCertificateServiceImpl(GiftCertificateDao giftDao,
+                                      AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper) {
+        this.giftDao = giftDao;
+        this.giftMapper = giftMapper;
+    }
 
     @Override
-    public List<GiftCertificateDto> findAllGifts(GiftSearchFilter giftSearchFilter) {
-        return giftDao.findAllEntities(giftSearchFilter)
+    public List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter,
+                                                 PaginationFilter paginationFilter) {
+        return giftDao.findAllEntities(giftSearchFilter, paginationFilter)
                 .stream()
                 .map(giftMapper::toDto)
                 .collect(Collectors.toList());

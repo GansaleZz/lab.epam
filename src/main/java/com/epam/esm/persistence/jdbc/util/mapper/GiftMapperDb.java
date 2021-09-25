@@ -27,9 +27,12 @@ public class GiftMapperDb implements ResultSetExtractor<List<GiftCertificate>> {
     private static final String DURATION = "duration";
     private static final String CREATE_DATE = "create_date";
     private static final String LAST_UPDATE_DATE = "last_update_date";
+    private final TagMapperDb tagMapperDb;
 
     @Autowired
-    private TagMapperDb tagMapperDb;
+    public GiftMapperDb(TagMapperDb tagMapperDb) {
+        this.tagMapperDb = tagMapperDb;
+    }
 
     /**
      * Implementation, which extract result set of all values of gift certificate tables columns

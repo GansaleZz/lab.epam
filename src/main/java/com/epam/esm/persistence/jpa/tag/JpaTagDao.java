@@ -5,6 +5,7 @@ import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.entity.User;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -34,8 +35,14 @@ public class JpaTagDao implements TagDao {
     private EntityManager entityManager;
 
     @Override
-    public List<Tag> findAllEntities() {
+    public List<Tag> findAllEntities(PaginationFilter paginationFilter) {
+        paginationFilter.setCount(entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
+                .getResultList()
+                .size());
+
         return entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
+                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+                .setMaxResults(paginationFilter.getItems())
                 .getResultList();
     }
 

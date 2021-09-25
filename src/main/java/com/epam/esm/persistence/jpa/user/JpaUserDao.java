@@ -3,6 +3,7 @@ package com.epam.esm.persistence.jpa.user;
 import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,13 +28,17 @@ public class JpaUserDao implements UserDao {
     private EntityManager entityManager;
 
     @Override
-    public List<User> findAllEntities() {
+    public List<User> findAllEntities(PaginationFilter paginationFilter) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
         criteriaQuery.select(root);
 
-        return entityManager.createQuery(criteriaQuery.select(root)).getResultList();
+        paginationFilter.setCount(entityManager.createQuery(criteriaQuery).getResultList().size());
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+                .setMaxResults(paginationFilter.getItems())
+                .getResultList();
     }
 
     @Override

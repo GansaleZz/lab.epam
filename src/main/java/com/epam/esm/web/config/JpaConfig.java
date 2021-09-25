@@ -20,7 +20,7 @@ import javax.sql.DataSource;
         "com.epam.esm.persistence.util.*",
         "com.epam.esm.service.*",
         "com.epam.esm.web.controller",
-        "com.epam.esm.web.exception"
+        "com.epam.esm.web.util.*"
 })
 public class JpaConfig {
     private ApplicationContext applicationContext;

@@ -11,8 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertificateDto, GiftCertificate> {
 
+    private final AbstractEntityMapper<TagDto, Tag> tagMapper;
+
     @Autowired
-    private AbstractEntityMapper<TagDto, Tag> tagMapper;
+    public GiftCertificateMapper(AbstractEntityMapper<TagDto, Tag> tagMapper) {
+        this.tagMapper = tagMapper;
+    }
 
     @Override
     public GiftCertificate toEntity(GiftCertificateDto giftCertificateDto) {

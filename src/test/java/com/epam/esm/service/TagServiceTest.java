@@ -5,8 +5,8 @@
 //import com.epam.esm.service.dto.TagDto;
 //import com.epam.esm.service.tag.TagServiceImpl;
 //import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-//import com.epam.esm.web.exception.EntityBadInputException;
-//import com.epam.esm.web.exception.EntityNotFoundException;
+//import com.epam.esm.web.util.exception.EntityBadInputException;
+//import com.epam.esm.web.util.exception.EntityNotFoundException;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

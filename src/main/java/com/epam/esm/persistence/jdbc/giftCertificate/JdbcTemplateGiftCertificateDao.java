@@ -1,14 +1,15 @@
-package com.epam.esm.persistence.jdbc.gift;
+package com.epam.esm.persistence.jdbc.giftCertificate;
 
-import com.epam.esm.persistence.dao.GiftDao;
+import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
+import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
-import com.epam.esm.persistence.util.search.GiftSearchFilter;
 import com.epam.esm.persistence.jdbc.util.mapper.GiftMapperDb;
 import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,7 +26,7 @@ import java.util.Optional;
 
 
 @Repository
-public class JdbcTemplateGiftDao implements GiftDao {
+public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
     private static final String SQL_FIND_ALL_GIFTS = "SELECT gift_certificate.gift_id, " +
             "gift_certificate.name, " +
             "gift_certificate.description,gift_certificate.price, " +
@@ -76,8 +77,10 @@ public class JdbcTemplateGiftDao implements GiftDao {
     private final JdbcTemplateTagDao jdbcTemplateTagDao;
 
     @Autowired
-    public JdbcTemplateGiftDao(JdbcTemplate jdbcTemplate,
-                               BaseGiftValidator<GiftCertificate, Long> giftValidation, GiftMapperDb giftMapper, JdbcTemplateTagDao jdbcTemplateTagDao) {
+    public JdbcTemplateGiftCertificateDao(JdbcTemplate jdbcTemplate,
+                                          BaseGiftValidator<GiftCertificate, Long> giftValidation,
+                                          GiftMapperDb giftMapper,
+                                          JdbcTemplateTagDao jdbcTemplateTagDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.giftValidation = giftValidation;
         this.giftMapper = giftMapper;
@@ -85,7 +88,8 @@ public class JdbcTemplateGiftDao implements GiftDao {
     }
 
     @Override
-    public List<GiftCertificate> findAllEntities(GiftSearchFilter giftSearchFilter) {
+    public List<GiftCertificate> findAllEntities(GiftCertificateSearchFilter giftSearchFilter,
+                                                 PaginationFilter paginationFilter) {
         giftValidation.onBeforeFindAllEntities(giftSearchFilter);
         StringBuilder query = new StringBuilder(SQL_FIND_ALL_GIFTS);
         StringBuilder queryParams = new StringBuilder();
@@ -191,7 +195,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
         }
     }
 
-    private void addTag(GiftSearchFilter giftSearchFilter,
+    private void addTag(GiftCertificateSearchFilter giftSearchFilter,
                         StringBuilder queryParams) {
         if (giftSearchFilter.getTags().size() != 0) {
             queryParams.append(WHERE);
@@ -199,7 +203,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
         }
     }
 
-    private void addPartOfName(GiftSearchFilter giftSearchFilter,
+    private void addPartOfName(GiftCertificateSearchFilter giftSearchFilter,
                                StringBuilder queryParams) {
         if (giftSearchFilter.getGiftName() != null) {
             if (!queryParams.toString().isEmpty()) {
@@ -211,7 +215,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
         }
     }
 
-    private void addPartOfDescription(GiftSearchFilter giftSearchFilter,
+    private void addPartOfDescription(GiftCertificateSearchFilter giftSearchFilter,
                                       StringBuilder queryParams) {
         if (giftSearchFilter.getGiftDescription() != null) {
             if (!queryParams.toString().isEmpty()) {
@@ -223,7 +227,7 @@ public class JdbcTemplateGiftDao implements GiftDao {
         }
     }
 
-    private void addOrderOfSearch(GiftSearchFilter giftSearchFilter,
+    private void addOrderOfSearch(GiftCertificateSearchFilter giftSearchFilter,
                                   StringBuilder orderParams) {
         if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO ||
                 giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {

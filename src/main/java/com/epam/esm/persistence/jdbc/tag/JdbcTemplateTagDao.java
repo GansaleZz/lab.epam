@@ -2,9 +2,9 @@ package com.epam.esm.persistence.jdbc.tag;
 
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.Tag;
-import com.epam.esm.persistence.entity.User;
 import com.epam.esm.persistence.jdbc.util.mapper.TagMapperDb;
 import com.epam.esm.persistence.jdbc.util.validation.BaseTagValidator;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -38,7 +38,7 @@ public class JdbcTemplateTagDao implements TagDao {
 
 
     @Override
-    public List<Tag> findAllEntities() {
+    public List<Tag> findAllEntities(PaginationFilter paginationFilter) {
         return jdbcTemplate.query(SQL_FIND_ALL_TAGS, tagMapper);
     }
 

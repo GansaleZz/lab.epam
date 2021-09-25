@@ -1,18 +1,19 @@
-package com.epam.esm.service.gift;
+package com.epam.esm.service.giftCertificate;
 
-import com.epam.esm.persistence.util.search.GiftSearchFilter;
+import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 
 import java.util.List;
 
-public interface GiftService{
+public interface GiftCertificateService {
 
     /**
      * Extracts all gift certificates from db.
      * @param giftSearchFilter need to set search parameters.
      * @return list of found gift certificates.
      */
-    List<GiftCertificateDto> findAllGifts(GiftSearchFilter giftSearchFilter);
+    List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter, PaginationFilter paginationFilter);
 
     /**
      * Searching gift certificate on db by id.

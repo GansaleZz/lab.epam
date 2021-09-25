@@ -1,13 +1,13 @@
 //package com.epam.esm.service;
 //
 //import com.epam.esm.persistence.entity.GiftCertificate;
-//import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
-//import com.epam.esm.persistence.util.search.GiftSearchFilter;
+//import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftCertificateDao;
+//import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 //import com.epam.esm.service.dto.GiftCertificateDto;
-//import com.epam.esm.service.gift.GiftServiceImpl;
+//import com.epam.esm.service.gift.GiftCertificateServiceImpl;
 //import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-//import com.epam.esm.web.exception.EntityBadInputException;
-//import com.epam.esm.web.exception.EntityNotFoundException;
+//import com.epam.esm.web.util.exception.EntityBadInputException;
+//import com.epam.esm.web.util.exception.EntityNotFoundException;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
@@ -31,18 +31,18 @@
 //@ExtendWith(MockitoExtension.class)
 //public class GiftServiceTest {
 //    @Mock
-//    private JdbcTemplateGiftDao jdbcTemplateGiftDao;
+//    private JdbcTemplateGiftCertificateDao jdbcTemplateGiftDao;
 //
 //    @Mock
 //    private AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 //
 //
 //    @InjectMocks
-//    private GiftServiceImpl giftService;
+//    private GiftCertificateServiceImpl giftService;
 //
 //    @Test
 //    void findAllGiftsWithoutSearchFilterParams() {
-//        GiftSearchFilter giftSearchFilter = new GiftSearchFilter();
+//        GiftCertificateSearchFilter giftSearchFilter = new GiftCertificateSearchFilter();
 //        GiftCertificate giftCertificateDao = GiftCertificate.builder()
 //                .name("Test1")
 //                .description("Test_test1")
@@ -66,7 +66,7 @@
 //
 //    @Test
 //    void findAllGiftsWithTagNotExists() {
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .tag("La la la")
 //                .build();
 //

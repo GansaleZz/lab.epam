@@ -5,7 +5,7 @@
 //import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 //import com.epam.esm.persistence.jdbc.util.mapper.TagMapperDb;
 //import com.epam.esm.persistence.jdbc.util.validation.BaseTagValidator;
-//import com.epam.esm.web.exception.EntityBadInputException;
+//import com.epam.esm.web.util.exception.EntityBadInputException;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.springframework.beans.factory.annotation.Autowired;

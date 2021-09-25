@@ -1,6 +1,5 @@
 package com.epam.esm.persistence.util.search;
 
-import com.epam.esm.persistence.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GiftSearchFilter {
+public class GiftCertificateSearchFilter {
     @Builder.Default
     @NotNull(message = "GiftsByNameOrder should not be null")
     private QueryOrder giftsByNameOrder = QueryOrder.NO;

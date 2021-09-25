@@ -5,7 +5,8 @@ import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +17,20 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
 
     private static final String NOT_FOUND_BY_ID = "Requested tag not found (id = %s)";
+    private final TagDao tagDao;
+    private final UserDao userDao;
+    private final AbstractEntityMapper<TagDto, Tag> tagMapper;
 
     @Autowired
-    private TagDao tagDao;
-
-    @Autowired
-    private UserDao userDao;
-
-    @Autowired
-    private AbstractEntityMapper<TagDto, Tag> tagMapper;
+    public TagServiceImpl(TagDao tagDao, UserDao userDao, AbstractEntityMapper<TagDto, Tag> tagMapper) {
+        this.tagDao = tagDao;
+        this.userDao = userDao;
+        this.tagMapper = tagMapper;
+    }
 
     @Override
-    public List<TagDto> findAllTags() {
-        return tagDao.findAllEntities()
+    public List<TagDto> findAllTags(PaginationFilter paginationFilter) {
+        return tagDao.findAllEntities(paginationFilter)
                 .stream()
                 .map(tagMapper::toDto)
                 .collect(Collectors.toList());

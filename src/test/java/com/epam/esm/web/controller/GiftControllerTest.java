@@ -2,7 +2,7 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.TestConfig;
 import com.epam.esm.service.dto.GiftCertificateDto;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class GiftControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    private GiftController giftController;
+    private GiftCertificateController giftController;
 
     @BeforeEach
     public void initialize() {

@@ -2,15 +2,15 @@
 //
 //import com.epam.esm.TestConfig;
 //import com.epam.esm.persistence.entity.GiftCertificate;
-//import com.epam.esm.persistence.dao.GiftDao;
-//import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftDao;
+//import com.epam.esm.persistence.dao.GiftCertificateDao;
+//import com.epam.esm.persistence.jdbc.gift.JdbcTemplateGiftCertificateDao;
 //import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 //import com.epam.esm.persistence.jdbc.util.mapper.GiftMapperDb;
-//import com.epam.esm.persistence.util.search.GiftSearchFilter;
+//import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 //import com.epam.esm.persistence.util.search.QueryOrder;
 //import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
-//import com.epam.esm.web.exception.EntityBadInputException;
-//import com.epam.esm.web.exception.EntityNotFoundException;
+//import com.epam.esm.web.util.exception.EntityBadInputException;
+//import com.epam.esm.web.util.exception.EntityNotFoundException;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +37,14 @@
 //@Sql(scripts = {"classpath:sql/db-clean.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 //class JdbcTemplateGiftDaoImplTest {
 //
-//    private final GiftDao jdbcTemplateGiftDao;
+//    private final GiftCertificateDao jdbcTemplateGiftDao;
 //
 //    @Autowired
 //    public JdbcTemplateGiftDaoImplTest(JdbcTemplate jdbcTemplate,
 //                                       BaseGiftValidator<GiftCertificate, Long> giftValidation,
 //                                       GiftMapperDb giftMapperDB,
 //                                       JdbcTemplateTagDao jdbcTemplateTagDao) {
-//        jdbcTemplateGiftDao = new JdbcTemplateGiftDao(jdbcTemplate, giftValidation,
+//        jdbcTemplateGiftDao = new JdbcTemplateGiftCertificateDao(jdbcTemplate, giftValidation,
 //                giftMapperDB, jdbcTemplateTagDao);
 //    }
 //
@@ -52,7 +52,7 @@
 //    void findAllGiftsWithoutSearchFilterParams() {
 //        int sizeAfterInit = 4;
 //
-//        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter());
+//        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(new GiftCertificateSearchFilter());
 //
 //        assertEquals(sizeAfterInit, listResult.size());
 //    }
@@ -60,7 +60,7 @@
 //    @Test
 //    void findAllGiftsWithTagNotExists() {
 //        String tagName = "Hey hey hey, Test!";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder().tag(tagName).build();
 //
 //        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 //
@@ -70,7 +70,7 @@
 //    @Test
 //    void findAllGiftsWithTagExists() {
 //        String tagName = "TAG_TEST_1";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder().tag(tagName).build();
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder().tag(tagName).build();
 //
 //        List<GiftCertificate> listResult = jdbcTemplateGiftDao.findAllEntities(giftSearchFilter);
 //
@@ -80,7 +80,7 @@
 //    @Test
 //    void findAllGiftsByNamePartExists() {
 //        String namePart = "TEST";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftName(namePart)
 //                .build();
 //
@@ -93,7 +93,7 @@
 //    @Test
 //    void findAllGiftsByNamePartNotExists() {
 //        String namePart = "test";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftName(namePart)
 //                .build();
 //
@@ -105,7 +105,7 @@
 //    @Test
 //    void findAllGiftsByDescriptionPartExists() {
 //        String descriptionPart = "_3";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftDescription(descriptionPart)
 //                .build();
 //
@@ -117,7 +117,7 @@
 //    @Test
 //    void findAllGiftsByNameDescriptionNotExists() {
 //        String descriptionPart = "_3!!";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftDescription(descriptionPart)
 //                .build();
 //
@@ -128,7 +128,7 @@
 //
 //    @Test
 //    void findAllGiftsByNameAscOrder() {
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftsByNameOrder(QueryOrder.ASC)
 //                .build();
 //
@@ -139,7 +139,7 @@
 //
 //    @Test
 //    void findAllGiftsByDateDescOrder() {
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftsByNameOrder(QueryOrder.DESC)
 //                .build();
 //
@@ -153,7 +153,7 @@
 //        String tagName = "TAG_TEST_2";
 //        String namePart = "TEST";
 //        String descriptionPart = "_";
-//        GiftSearchFilter giftSearchFilter = GiftSearchFilter.builder()
+//        GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
 //                .giftName(namePart)
 //                .tag(tagName)
 //                .giftDescription(descriptionPart)
@@ -241,12 +241,12 @@
 //    @Test
 //    void deleteSuccess() {
 //        Long id = 1L;
-//        int sizeBefore = jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size();
+//        int sizeBefore = jdbcTemplateGiftDao.findAllEntities(new GiftCertificateSearchFilter()).size();
 //
 //        boolean res = jdbcTemplateGiftDao.delete(id);
 //
 //        assertTrue(res);
-//        assertEquals(sizeBefore-1, jdbcTemplateGiftDao.findAllEntities(new GiftSearchFilter()).size());
+//        assertEquals(sizeBefore-1, jdbcTemplateGiftDao.findAllEntities(new GiftCertificateSearchFilter()).size());
 //    }
 //
 //    @Test

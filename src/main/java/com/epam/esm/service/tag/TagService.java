@@ -1,6 +1,7 @@
 package com.epam.esm.service.tag;
 
 import com.epam.esm.service.dto.TagDto;
+import com.epam.esm.web.util.pagination.PaginationFilter;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface TagService {
      * Extracts all tags from db.
      * @return list of found tags.
      */
-    List<TagDto> findAllTags();
+    List<TagDto> findAllTags(PaginationFilter paginationFilter);
 
     /**
      * Searching tag on db by id.
