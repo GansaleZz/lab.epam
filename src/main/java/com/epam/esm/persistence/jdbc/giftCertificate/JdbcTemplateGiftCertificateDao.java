@@ -199,7 +199,7 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
                         StringBuilder queryParams) {
         if (giftSearchFilter.getTags().size() != 0) {
             queryParams.append(WHERE);
-            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTags()));
+            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTags().get(0)));
         }
     }
 

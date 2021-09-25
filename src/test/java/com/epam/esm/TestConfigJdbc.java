@@ -16,34 +16,35 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 
 @Configuration
-@ComponentScan({"com.epam.esm.persistence",
-        "com.epam.esm.util",
-        "com.epam.esm.service",
-        "com.epam.esm.web.controller"})
+@ComponentScan(basePackages = {
+        "com.epam.esm.persistence.jdbc.*",
+        "com.epam.esm.persistence.dao",
+        "com.epam.esm.persistence.util.*",
+})
 @WebAppConfiguration
-public class TestConfig {
+public class TestConfigJdbc {
 
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public TestConfig(ApplicationContext applicationContext) {
+    public TestConfigJdbc(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
+//
+//    @Bean
+//    public PlatformTransactionManager transactionManager() {
+//        return new DataSourceTransactionManager(getDataSource());
+//    }
+//
+//    @Bean
+//    public EmbeddedDatabase getDataSource(){
+//        return new EmbeddedDatabaseBuilder()
+//                .setType(EmbeddedDatabaseType.H2)
+//                .build();
+//    }
 
-    @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(getDataSource());
-    }
-
-    @Bean
-    public EmbeddedDatabase getDataSource(){
-        return new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
-    }
-
-    @Bean
-    public JdbcTemplate getJdbcTemplate(){
-        return new JdbcTemplate(getDataSource());
-    }
+//    @Bean
+//    public JdbcTemplate getJdbcTemplate(){
+//        return new JdbcTemplate(getDataSource());
+//    }
 }

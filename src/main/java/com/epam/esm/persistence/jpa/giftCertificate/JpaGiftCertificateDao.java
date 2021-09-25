@@ -39,70 +39,69 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
 
    @PersistenceContext
    private EntityManager entityManager;
-
    private final TagDao tagDao;
 
    @Autowired
-    public JpaGiftCertificateDao(TagDao tagDao) {
+   public JpaGiftCertificateDao(TagDao tagDao) {
         this.tagDao = tagDao;
     }
 
-    @Override
-    public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
-                                                         PaginationFilter paginationFilter) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
-                .createQuery(GiftCertificate.class);
-        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-        criteriaQuery.select(root);
+   @Override
+   public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                        PaginationFilter paginationFilter) {
+       CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+       CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
+               .createQuery(GiftCertificate.class);
+       Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+       criteriaQuery.select(root);
 
-        if (giftSearchFilter.getTags().size() != 0) {
-            tagsExists(giftSearchFilter, criteriaQuery, root);
-        }
-        if (giftSearchFilter.getGiftName() != null) {
-            partOfNameExists(giftSearchFilter, criteriaQuery, root);
-        }
-        if (giftSearchFilter.getGiftDescription() != null) {
-            partOfDescriptionExists(giftSearchFilter, criteriaQuery, root);
-        }
-        criteriaQuery.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
+       if (giftSearchFilter.getTags().size() != 0) {
+           tagsExists(giftSearchFilter, criteriaQuery, root);
+       }
+       if (giftSearchFilter.getGiftName() != null) {
+           partOfNameExists(giftSearchFilter, criteriaQuery, root);
+       }
+       if (giftSearchFilter.getGiftDescription() != null) {
+           partOfDescriptionExists(giftSearchFilter, criteriaQuery, root);
+       }
+       criteriaQuery.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
 
-        paginationFilter.setCount(entityManager.createQuery(criteriaQuery)
-                .getResultList().size());
+       paginationFilter.setCount(entityManager.createQuery(criteriaQuery)
+               .getResultList().size());
 
-        return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
-                .setMaxResults(paginationFilter.getItems())
-                .getResultList();
-    }
+       return entityManager.createQuery(criteriaQuery)
+               .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+               .setMaxResults(paginationFilter.getItems())
+               .getResultList();
+   }
 
-    @Override
-    public Optional<GiftCertificate> findEntityById(Long id) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
-                .createQuery(GiftCertificate.class);
-        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-        criteriaQuery.select(root);
+   @Override
+   public Optional<GiftCertificate> findEntityById(Long id) {
+       CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+       CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
+               .createQuery(GiftCertificate.class);
+       Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+       criteriaQuery.select(root);
 
-        criteriaQuery.where(criteriaBuilder.equal(root.get(ID), id));
+       criteriaQuery.where(criteriaBuilder.equal(root.get(ID), id));
 
-        return entityManager.createQuery(criteriaQuery)
-                .getResultList()
-                .stream()
-                .findAny();
-    }
+       return entityManager.createQuery(criteriaQuery)
+               .getResultList()
+               .stream()
+               .findAny();
+   }
 
-    @Override
-    @Transactional
-    public GiftCertificate create(GiftCertificate giftCertificate) {
-        giftCertificate.setCreateDate(LocalDateTime.now());
-        giftCertificate.setLastUpdateDate(LocalDateTime.now());
-        giftCertificate.getTags().forEach(tag -> tagDao.create(tag));
+   @Override
+   @Transactional
+   public GiftCertificate create(GiftCertificate giftCertificate) {
+       giftCertificate.setCreateDate(LocalDateTime.now());
+       giftCertificate.setLastUpdateDate(LocalDateTime.now());
+       giftCertificate.getTags().forEach(tagDao::create);
 
-        entityManager.persist(giftCertificate);
+       entityManager.persist(giftCertificate);
 
-        return giftCertificate;
-    }
+       return giftCertificate;
+   }
 
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {

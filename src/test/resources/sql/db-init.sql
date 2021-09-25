@@ -1,24 +1,55 @@
-CREATE TABLE gift_certificate(
-                                 gift_id BIGINT AUTO_INCREMENT PRIMARY KEY ,
-                                 name VARCHAR(25) NOT NULL ,
-                                 description VARCHAR(100) ,
-                                 price DOUBLE NOT NULL ,
-                                 duration INT NOT NULL ,
-                                 create_date DATE NOT NULL ,
-                                 last_update_date DATE NOT NULL
+create table gift_certificate
+(
+    gift_id          bigint auto_increment
+        primary key,
+    name             varchar(25)  not null,
+    description      varchar(100) null,
+    price            double       not null,
+    duration         bigint       not null,
+    create_date      datetime     not null,
+    last_update_date datetime     not null
 );
 
-CREATE TABLE tag(
-                    tag_id BIGINT AUTO_INCREMENT PRIMARY KEY ,
-                    name VARCHAR(25) NOT NULL
+create table tag
+(
+    tag_id bigint auto_increment
+        primary key,
+    name   varchar(25) not null,
+    constraint tag_name_uindex
+        unique (name)
 );
 
-CREATE TABLE gift_tags(
-                          gift_id BIGINT NOT NULL ,
-                          tag_id BIGINT NOT NULL ,
-                          PRIMARY KEY (gift_id, tag_id),
-                          CONSTRAINT gift_certificate_fk FOREIGN KEY (gift_id) REFERENCES gift_certificate (gift_id) ON DELETE CASCADE ,
-                          CONSTRAINT tag_fk FOREIGN KEY (tag_id) REFERENCES tag (tag_id) ON DELETE CASCADE
+create table gift_tags
+(
+    gift_id bigint not null,
+    tag_id  bigint not null,
+    primary key (gift_id, tag_id),
+    constraint gift_certificate_fk
+        foreign key (gift_id) references gift_certificate (gift_id)
+            on delete cascade,
+    constraint tag_fk
+        foreign key (tag_id) references tag (tag_id)
+            on delete cascade
+);
+
+create table user
+(
+    user_id bigint not null
+        primary key
+);
+
+create table user_order
+(
+    order_id  bigint auto_increment
+        primary key,
+    timestamp datetime not null,
+    cost      double   not null,
+    user_id   bigint   not null,
+    gift_id   bigint   null,
+    constraint FKe9drqlvogxhvi2cdm8kfobhh3
+        foreign key (gift_id) references gift_certificate (gift_id),
+    constraint FKj86u1x7csa8yd68ql2y1ibrou
+        foreign key (user_id) references user (user_id)
 );
 
 INSERT INTO gift_certificate

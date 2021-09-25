@@ -1,6 +1,6 @@
 //package com.epam.esm.persistence.jdbc;
 //
-//import com.epam.esm.TestConfig;
+//import com.epam.esm.TestConfigJdbc;
 //import com.epam.esm.persistence.entity.Tag;
 //import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
 //import com.epam.esm.persistence.jdbc.util.mapper.TagMapperDb;
@@ -24,7 +24,7 @@
 //import static org.junit.jupiter.api.Assertions.assertTrue;
 //
 //@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = { TestConfig.class }, loader = AnnotationConfigContextLoader.class)
+//@ContextConfiguration(classes = { TestConfigJdbc.class }, loader = AnnotationConfigContextLoader.class)
 //@Sql(scripts = "classpath:sql/db-init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 //@Sql(scripts = {"classpath:sql/db-clean.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 //class JdbcTemplateTagDaoImplTest {

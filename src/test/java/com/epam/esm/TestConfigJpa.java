@@ -1,4 +1,4 @@
-package com.epam.esm.web.config;
+package com.epam.esm;
 
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,15 @@ import javax.sql.DataSource;
         "com.epam.esm.persistence.util.*",
         "com.epam.esm.service.*",
         "com.epam.esm.web.controller",
-        "com.epam.esm.web.util.*"
+        "com.epam.esm.web.util.*",
+        "com.epam.esm.web.main"
 })
-public class JpaConfig {
-    private ApplicationContext applicationContext;
+public class TestConfigJpa {
     private final JpaVendorAdapter jpaVendorAdapter;
+    private final ApplicationContext applicationContext;
 
     @Autowired
-    public JpaConfig(ApplicationContext applicationContext, JpaVendorAdapter jpaVendorAdapter) {
+    public TestConfigJpa(ApplicationContext applicationContext, JpaVendorAdapter jpaVendorAdapter) {
         this.applicationContext = applicationContext;
         this.jpaVendorAdapter = jpaVendorAdapter;
     }
@@ -48,4 +49,5 @@ public class JpaConfig {
     public SessionFactory sessionFactory(EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.unwrap(SessionFactory.class);
     }
+
 }
