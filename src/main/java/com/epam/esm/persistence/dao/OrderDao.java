@@ -10,9 +10,28 @@ import java.util.Optional;
 
 public interface OrderDao {
 
-    Optional<Order> findOrderById(Long id, Long userId);
-
+    /**
+     * Searching all orders of user on db.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param id - user's id.
+     * @return list of found orders.
+     */
     List<Order> findOrdersByUserId(PaginationFilter paginationFilter, Long id);
 
+    /**
+     * Searching order on db by id.
+     * @param id - order's id.
+     * @param userId - user's id.
+     * @return order if it exists and empty optional if not.
+     */
+    Optional<Order> findOrderById(Long id, Long userId);
+
+    /**
+     * Creating order on db.
+     * @param giftCertificate - the gift certificate that the user is buying.
+     * @param user - user, which buying gift certificate.
+     * @return created order.
+     */
     Order create(GiftCertificate giftCertificate, User user);
 }

@@ -31,7 +31,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter,
                                                  PaginationFilter paginationFilter) {
-        return giftDao.findAllEntities(giftSearchFilter, paginationFilter)
+        return giftDao.findAllGiftCertificates(giftSearchFilter, paginationFilter)
                 .stream()
                 .map(giftMapper::toDto)
                 .collect(Collectors.toList());

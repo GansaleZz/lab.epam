@@ -20,6 +20,10 @@ public interface TagService {
      */
     TagDto findTagById(Long id);
 
+    /**
+     * Searching the most widely used tag of a user with the highest cost of all orders on db.
+     * @return found tag.
+     */
     TagDto findMostWidelyUsedTag();
 
     /**

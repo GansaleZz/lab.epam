@@ -15,10 +15,12 @@ import javax.validation.constraints.Null;
 public class PaginationFilter {
 
     @NotNull(message = "Page should not be null")
-    private Integer page;
+    @Builder.Default
+    private Integer page = 0;
 
     @NotNull(message = "Items should not be null")
-    private Integer items;
+    @Builder.Default
+    private Integer items = 1;
 
     @Null
     private Integer count;

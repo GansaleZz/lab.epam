@@ -88,8 +88,8 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> findAllEntities(GiftCertificateSearchFilter giftSearchFilter,
-                                                 PaginationFilter paginationFilter) {
+    public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                         PaginationFilter paginationFilter) {
         giftValidation.onBeforeFindAllEntities(giftSearchFilter);
         StringBuilder query = new StringBuilder(SQL_FIND_ALL_GIFTS);
         StringBuilder queryParams = new StringBuilder();

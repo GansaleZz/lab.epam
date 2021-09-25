@@ -10,10 +10,11 @@ public interface GiftCertificateDao extends BaseDao<Long, GiftCertificate> {
 
     /**
      * Searching all the gift certificates on db.
-     * @param giftSearchFilter need to set search parameters.
+     * @param giftSearchFilter need for set search parameters.
      * @return list of found gift certificates.
      */
-    List<GiftCertificate> findAllEntities(GiftCertificateSearchFilter giftSearchFilter, PaginationFilter paginationFilter);
+    List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                  PaginationFilter paginationFilter);
 
     /**
      * Updating gift certificate on db.

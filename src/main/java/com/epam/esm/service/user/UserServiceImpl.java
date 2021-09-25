@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<UserDto> findAllUsers(PaginationFilter paginationFilter) {
-        return userDao.findAllEntities(paginationFilter)
+        return userDao.findAllUsers(paginationFilter)
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDto findUserById(Long id) {
-        return userDao.findEntityById(id)
+        return userDao.findUserById(id)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
                         id)));

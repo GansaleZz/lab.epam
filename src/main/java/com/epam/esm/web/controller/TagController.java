@@ -3,7 +3,6 @@ package com.epam.esm.web.controller;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagService;
 import com.epam.esm.web.util.exception.EntityBadInputException;
-import com.epam.esm.web.util.exception.EntityNotFoundException;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import com.epam.esm.web.util.pagination.link.PaginationEntityLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,42 +46,39 @@ public class TagController {
 
     /**
      * Extracts all tags from bd.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
      * @return list of tags on JSON format.
      */
     @GetMapping
     public CollectionModel<EntityModel<TagDto>> listOfTags(@Valid PaginationFilter paginationFilter,
-                                                           BindingResult bindingResult) throws NoSuchMethodException {
+                                                           BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
+
         List<TagDto> tags = tagService.findAllTags(paginationFilter);
         List<EntityModel<TagDto>> model = tags.stream()
                 .map(EntityModel::of).collect(Collectors.toList());
-        Method listOfTags = this.getClass().getMethod(LIST_OF_TAGS,
-                PaginationFilter.class,
-                BindingResult.class);
+        Method listOfTags;
+        try {
+            listOfTags = this.getClass().getMethod(LIST_OF_TAGS,
+                    PaginationFilter.class,
+                    BindingResult.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(NO_METHOD);
+        }
 
-        model.forEach(
-                tag -> {
-                    try {
-                        tag.add(
-                                WebMvcLinkBuilder
-                                        .linkTo(WebMvcLinkBuilder
-                                                .methodOn(this.getClass()).tagById(tag.getContent().getId()))
-                                        .withRel(TAG)
-                                        .withName(tag.getContent().getName())
-                        );
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(NO_METHOD);
-                    }
-                }
-        );
+        model.forEach(tag -> tag.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                .tagById(tag.getContent().getId()))
+                        .withRel(TAG)
+                        .withName(tag.getContent().getName())));
 
         CollectionModel<EntityModel<TagDto>> result = CollectionModel.of(model);
-        Link selfLink = WebMvcLinkBuilder.linkTo(
-                WebMvcLinkBuilder.methodOn(this.getClass())
-                        .listOfTags(paginationFilter, bindingResult)
-        )
+        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .listOfTags(paginationFilter,
+                                bindingResult))
                 .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
@@ -105,27 +101,22 @@ public class TagController {
 
     /**
      * Extracts tag by id from bd.
-     * @param id of tag.
+     * @param id - tag's id.
      * @return found tag on JSON format.
-     * @throws EntityNotFoundException if tag does not exist.
      */
     @GetMapping("/{id}")
-    public EntityModel<TagDto> tagById(@PathVariable("id") Long id) throws NoSuchMethodException {
+    public EntityModel<TagDto> tagById(@PathVariable("id") Long id) {
         TagDto tag = tagService.findTagById(id);
         EntityModel<TagDto> model = EntityModel.of(tag);
-        PaginationFilter paginationFilter = PaginationFilter.builder()
-                .page(0)
-                .items(1)
-                .build();
+        PaginationFilter paginationFilter = PaginationFilter.builder().build();
 
-        Link selfLink = WebMvcLinkBuilder.linkTo(
-                WebMvcLinkBuilder.methodOn(this.getClass()).tagById(id)
-        )
+        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .tagById(id))
                 .withSelfRel();
-        Link tagsLink = WebMvcLinkBuilder.linkTo(
-                WebMvcLinkBuilder.methodOn(this.getClass())
-                        .listOfTags(paginationFilter, null)
-        )
+
+        Link tagsLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .listOfTags(paginationFilter,
+                                null))
                 .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
@@ -138,25 +129,26 @@ public class TagController {
     /**
      * Creating tag on bd.
      * @param tag which we want to create on bd.
+     * @param bindingResult - need for catch problems with validating.
      * @return created tag on JSON format.
-     * @throws EntityBadInputException if one of non null parameters is null.
      */
     @PostMapping
-    public ResponseEntity<TagDto> create(@Valid @RequestBody TagDto tag, BindingResult error) throws EntityBadInputException {
-        if (error.hasErrors()) {
-            throw new EntityBadInputException(error.getFieldError().getDefaultMessage());
+    public ResponseEntity<TagDto> create(@Valid @RequestBody TagDto tag,
+                                         BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
+
         return new ResponseEntity<>(tagService.create(tag), HttpStatus.CREATED);
     }
 
     /**
      * Deleting tag from bd.
-     * @param id of tag.
+     * @param id - tag's id.
      * @return result of deleting.
-     * @throws EntityNotFoundException if tag does not exist.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("id") Long id) throws EntityNotFoundException{
+    public ResponseEntity<Boolean> delete(@PathVariable("id") Long id) {
         return new ResponseEntity<>(tagService.delete(id), HttpStatus.OK);
     }
 }

@@ -36,9 +36,8 @@ public class JdbcTemplateTagDao implements TagDao {
         this.tagMapper = tagMapper;
     }
 
-
     @Override
-    public List<Tag> findAllEntities(PaginationFilter paginationFilter) {
+    public List<Tag> findAllTags(PaginationFilter paginationFilter) {
         return jdbcTemplate.query(SQL_FIND_ALL_TAGS, tagMapper);
     }
 

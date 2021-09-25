@@ -48,8 +48,8 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> findAllEntities(GiftCertificateSearchFilter giftSearchFilter,
-                                                 PaginationFilter paginationFilter) {
+    public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                         PaginationFilter paginationFilter) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
                 .createQuery(GiftCertificate.class);

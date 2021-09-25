@@ -12,6 +12,7 @@ public class TagMapperDb implements RowMapper<Tag> {
 
     private static final String TAG_ID = "tag_id";
     private static final String TAG_NAME = "tag_name";
+
     /**
      * Implementation, which extract result set of all values of tag tables columns
      * and then initializes tags by them

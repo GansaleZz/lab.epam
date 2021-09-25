@@ -3,6 +3,7 @@ package com.epam.esm.web.controller;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.dto.OrderDto;
 import com.epam.esm.service.order.OrderService;
+import com.epam.esm.web.util.exception.EntityBadInputException;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import com.epam.esm.web.util.pagination.link.PaginationOrderLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/users/{userId}/orders")
 public class OrderController {
 
+    private static final String BAD_INPUT = "Please enter correct details for ";
     private static final String NO_METHOD = "Method not found";
     private static final String ORDER = "order";
     private static final String ORDERS = "orders";
@@ -43,48 +45,52 @@ public class OrderController {
         this.paginationOrderLink = paginationOrderLink;
     }
 
+    /**
+     * Extracts all user's orders from bd.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param userId - user's id.
+     * @param bindingResult - need for catch problems with validating.
+     * @return found list of user's orders on JSON format.
+     */
     @GetMapping()
     public CollectionModel<EntityModel<OrderDto>> listOfUserOrders(@Valid PaginationFilter paginationFilter,
                                                                    @PathVariable("userId") Long userId,
-                                                                   BindingResult bindingResult)
-            throws NoSuchMethodException {
+                                                                   BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+        }
+
         List<OrderDto> orders = orderService.findOrdersByUserId(paginationFilter, userId);
         List<EntityModel<OrderDto>> model = orders.stream()
                 .map(EntityModel::of).collect(Collectors.toList());
+        Method listOfOrders;
+        try {
+            listOfOrders = this.getClass().getMethod(LIST_OF_ORDERS,
+                    PaginationFilter.class,
+                    Long.class,
+                    BindingResult.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(NO_METHOD);
+        }
 
-        Method listOfOrders = this.getClass().getMethod(LIST_OF_ORDERS,
-                PaginationFilter.class,
-                Long.class,
-                BindingResult.class);
-
-        model.forEach(
-                order -> {
-                    try {
-                        order.add(WebMvcLinkBuilder
-                                .linkTo(WebMvcLinkBuilder
-                                        .methodOn(this.getClass())
-                                        .orderById(userId, order.getContent().getId()))
-                                .withRel(ORDER));
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(NO_METHOD);
-                    }
-                }
-        );
+        model.forEach(order -> order.add(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder
+                        .methodOn(this.getClass())
+                        .orderById(userId,
+                                order.getContent().getId()))
+                .withRel(ORDER)));
 
         CollectionModel<EntityModel<OrderDto>> result = CollectionModel.of(model);
 
-        result.add(
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass())
-                                .listOfUserOrders(
-                                        paginationFilter, userId, bindingResult
-                                )
-                        )
-                        .slash(String.format(PaginationOrderLink.PAGE_ITEMS,
-                                paginationFilter.getPage(),
-                                paginationFilter.getItems()))
-                        .withSelfRel()
-        );
+        result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                .listOfUserOrders(paginationFilter,
+                                        userId,
+                                        bindingResult))
+                .slash(String.format(PaginationOrderLink.PAGE_ITEMS,
+                        paginationFilter.getPage(),
+                        paginationFilter.getItems()))
+                .withSelfRel());
 
         if (paginationFilter.getItems() != 0) {
             paginationOrderLink.nextLink(listOfOrders, userId,
@@ -103,22 +109,27 @@ public class OrderController {
         return result;
     }
 
+    /**
+     * Extracts order by id from bd.
+     * @param userId - user's id.
+     * @param id - order's id.
+     * @return order (if exists) on JSON format.
+     */
     @GetMapping("/{id}")
     public EntityModel<OrderDto> orderById(@PathVariable("userId") Long userId,
-                                              @PathVariable("id") Long id)
-            throws NoSuchMethodException {
+                                              @PathVariable("id") Long id) {
         EntityModel<OrderDto> model = EntityModel.of(orderService.findOrderById(id, userId));
-        PaginationFilter paginationFilter = PaginationFilter.builder()
-                .page(0)
-                .items(1)
-                .build();
+        PaginationFilter paginationFilter = PaginationFilter.builder().build();
 
         model.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
-                .methodOn(this.getClass()).orderById(userId, id)).withSelfRel());
-        Link orders = WebMvcLinkBuilder
-                .linkTo(WebMvcLinkBuilder
-                        .methodOn(this.getClass()).listOfUserOrders(paginationFilter,
-                                userId, null))
+                .methodOn(this.getClass())
+                .orderById(userId, id))
+                .withSelfRel());
+
+        Link orders = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .listOfUserOrders(paginationFilter,
+                                userId,
+                                null))
                 .slash(String.format(PaginationOrderLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
@@ -128,10 +139,17 @@ public class OrderController {
         return model;
     }
 
+    /**
+     * Creating order on bd.
+     * @param userId - user's id.
+     * @param giftCertificateDto - gift certificate, which user buying.
+     * @return created order.
+     */
     @PostMapping
     public ResponseEntity<OrderDto> create(@PathVariable("userId") Long userId,
                                            @RequestBody GiftCertificateDto giftCertificateDto) {
         return new ResponseEntity<>(orderService.create(userId,
-                giftCertificateDto.getId()), HttpStatus.OK);
+                giftCertificateDto.getId()),
+                HttpStatus.OK);
     }
 }

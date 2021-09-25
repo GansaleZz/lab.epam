@@ -28,7 +28,7 @@ public class JpaUserDao implements UserDao {
     private EntityManager entityManager;
 
     @Override
-    public List<User> findAllEntities(PaginationFilter paginationFilter) {
+    public List<User> findAllUsers(PaginationFilter paginationFilter) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
@@ -42,7 +42,7 @@ public class JpaUserDao implements UserDao {
     }
 
     @Override
-    public Optional<User> findEntityById(Long id) {
+    public Optional<User> findUserById(Long id) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
@@ -57,7 +57,7 @@ public class JpaUserDao implements UserDao {
     }
 
     @Override
-    public Long findUserWithTheHighestCost() {
+    public Long findUserWithTheHighestOrdersCost() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
         Root<Order> root = criteriaQuery.from(Order.class);

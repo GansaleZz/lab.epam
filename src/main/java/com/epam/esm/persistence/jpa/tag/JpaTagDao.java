@@ -35,7 +35,7 @@ public class JpaTagDao implements TagDao {
     private EntityManager entityManager;
 
     @Override
-    public List<Tag> findAllEntities(PaginationFilter paginationFilter) {
+    public List<Tag> findAllTags(PaginationFilter paginationFilter) {
         paginationFilter.setCount(entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
                 .getResultList()
                 .size());

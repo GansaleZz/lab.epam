@@ -18,6 +18,14 @@ public class PaginationEntityLink {
     protected static final String FIRST = "first";
     protected static final String LAST = "last";
 
+    /**
+     * Creates link on next page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on next page if current page is not last.
+     */
     public Optional<Link> nextLink(Method method,
                                    PaginationFilter paginationFilter,
                                    BindingResult bindingResult) {
@@ -30,6 +38,14 @@ public class PaginationEntityLink {
                 .withRel(NEXT));
     }
 
+    /**
+     * Creates link on previous page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on previous page if current page is not first.
+     */
     public Optional<Link> prevLink(Method method,
                                    PaginationFilter paginationFilter,
                                    BindingResult bindingResult) {
@@ -42,6 +58,14 @@ public class PaginationEntityLink {
                 .withRel(PREV));
     }
 
+    /**
+     * Creates link on first page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on first page if current page is not first.
+     */
     public Optional<Link> firstLink(Method method,
                                     PaginationFilter paginationFilter,
                                     BindingResult bindingResult) {
@@ -54,6 +78,14 @@ public class PaginationEntityLink {
                 .withRel(FIRST));
     }
 
+    /**
+     * Creates link on last page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on last page if current page is not last.
+     */
     public Optional<Link> lastLink(Method method,
                                    PaginationFilter paginationFilter,
                                    BindingResult bindingResult) {

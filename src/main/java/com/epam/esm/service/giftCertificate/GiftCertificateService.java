@@ -10,10 +10,11 @@ public interface GiftCertificateService {
 
     /**
      * Extracts all gift certificates from db.
-     * @param giftSearchFilter need to set search parameters.
+     * @param giftSearchFilter need for set search parameters.
      * @return list of found gift certificates.
      */
-    List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter, PaginationFilter paginationFilter);
+    List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter,
+                                          PaginationFilter paginationFilter);
 
     /**
      * Searching gift certificate on db by id.

@@ -30,7 +30,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagDto> findAllTags(PaginationFilter paginationFilter) {
-        return tagDao.findAllEntities(paginationFilter)
+        return tagDao.findAllTags(paginationFilter)
                 .stream()
                 .map(tagMapper::toDto)
                 .collect(Collectors.toList());
@@ -48,7 +48,7 @@ public class TagServiceImpl implements TagService {
     public TagDto findMostWidelyUsedTag() {
         return tagMapper.toDto(tagDao
                 .findMostWidelyUsedTag(userDao
-                        .findUserWithTheHighestCost()));
+                        .findUserWithTheHighestOrdersCost()));
     }
 
     @Override

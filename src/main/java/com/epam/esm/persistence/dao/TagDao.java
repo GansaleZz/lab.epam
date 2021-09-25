@@ -9,10 +9,16 @@ public interface TagDao extends BaseDao<Long, Tag> {
 
     /**
      * Searching all the tags on db.
-     * @return list of found gift certificates.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @return list of found tags.
      */
-    List<Tag> findAllEntities(PaginationFilter paginationFilter);
+    List<Tag> findAllTags(PaginationFilter paginationFilter);
 
-
+    /**
+     * Searching the most widely used tag of a user with the highest cost of all orders on db.
+     * @param id - user's id.
+     * @return found tag.
+     */
     Tag findMostWidelyUsedTag(Long id);
 }

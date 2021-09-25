@@ -13,6 +13,15 @@ import java.util.Optional;
 @Component
 public class PaginationGiftCertificateLink extends PaginationEntityLink {
 
+    /**
+     * Creates link on next page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param giftCertificateSearchFilter - need for set search parameters.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on next page if current page is not last.
+     */
     public Optional<Link> nextLink(Method method,
                                    PaginationFilter paginationFilter,
                                    GiftCertificateSearchFilter giftCertificateSearchFilter,
@@ -27,6 +36,15 @@ public class PaginationGiftCertificateLink extends PaginationEntityLink {
                 .withRel(NEXT));
     }
 
+    /**
+     * Creates link on previous page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param giftCertificateSearchFilter - need for set search parameters.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on previous page if current page is not first.
+     */
     public Optional<Link> prevLink(Method method,
                                    PaginationFilter paginationFilter,
                                    GiftCertificateSearchFilter giftCertificateSearchFilter,
@@ -41,6 +59,15 @@ public class PaginationGiftCertificateLink extends PaginationEntityLink {
                 .withRel(PREV));
     }
 
+    /**
+     * Creates link on first page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param giftCertificateSearchFilter - need for set search parameters.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on first page if current page is not first.
+     */
     public Optional<Link> firstLink(Method method,
                                     PaginationFilter paginationFilter,
                                     GiftCertificateSearchFilter giftCertificateSearchFilter,
@@ -55,6 +82,15 @@ public class PaginationGiftCertificateLink extends PaginationEntityLink {
                 .withRel(FIRST));
     }
 
+    /**
+     * Creates link on last page.
+     * @param method which uses for get all entities.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param giftCertificateSearchFilter - need for set search parameters.
+     * @param bindingResult - need for catch problems with validating.
+     * @return link on last page if current page is not last.
+     */
     public Optional<Link> lastLink(Method method,
                                    PaginationFilter paginationFilter,
                                    GiftCertificateSearchFilter giftCertificateSearchFilter,

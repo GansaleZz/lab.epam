@@ -7,7 +7,18 @@ import java.util.List;
 
 public interface UserService {
 
+    /**
+     * Searching all users on db.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @return list of found users.
+     */
     List<UserDto> findAllUsers(PaginationFilter paginationFilter);
 
+    /**
+     * Searching user on db by id.
+     * @param id - user's id.
+     * @return user if it exists and empty optional if not.
+     */
     UserDto findUserById(Long id);
 }

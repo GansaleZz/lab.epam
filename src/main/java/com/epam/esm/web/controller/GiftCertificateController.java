@@ -53,68 +53,62 @@ public class GiftCertificateController {
 
     /**
      * Extracts all gift certificates from bd.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param giftSearchFilter - need for set search parameters.
+     * @param bindingResult - need for catch problems with validating.
      * @return found list of gift certificates on JSON format.
-     * @throws EntityBadInputException if one of filters fields is incorrect.
      */
     @GetMapping
     public CollectionModel<EntityModel<GiftCertificateDto>> listOfGiftCertificates(PaginationFilter paginationFilter,
                                                                         @Valid GiftCertificateSearchFilter giftSearchFilter,
-                                                                        BindingResult bindingResult)
-            throws EntityBadInputException, NoSuchMethodException {
+                                                                        BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
 
         List<GiftCertificateDto> certificates = giftService.findAllGifts(giftSearchFilter, paginationFilter);
         List<EntityModel<GiftCertificateDto>> model = certificates.stream()
-                .map(EntityModel::of).collect(Collectors.toList());
-        Method listOfGiftCertificates = this.getClass().getMethod(LIST_OF_GIFT_CERTIFICATES,
-                PaginationFilter.class,
-                GiftCertificateSearchFilter.class,
-                BindingResult.class);
+                .map(EntityModel::of)
+                .collect(Collectors.toList());
+        Method listOfGiftCertificates;
+        try {
+            listOfGiftCertificates = this.getClass().getMethod(LIST_OF_GIFT_CERTIFICATES,
+                    PaginationFilter.class,
+                    GiftCertificateSearchFilter.class,
+                    BindingResult.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(NO_METHOD);
+        }
 
         model.forEach(
                 certificate -> {
                     List<Link> tagLinks = new ArrayList<>();
                     certificate.getContent().getTags()
-                            .forEach(
-                                    tag -> {
-                                        try {
-                                            tagLinks.add(WebMvcLinkBuilder
-                                                    .linkTo(WebMvcLinkBuilder
-                                                            .methodOn(TagController.class)
-                                                            .tagById(tag.getId()))
-                                                    .withRel(TAG )
-                                                    .withName(tag.getName()));
-                                        } catch (NoSuchMethodException e) {
-                                            throw new RuntimeException(NO_METHOD);
-                                        }
-                                    }
+                            .forEach(tag -> tagLinks.add(WebMvcLinkBuilder
+                                    .linkTo(WebMvcLinkBuilder
+                                            .methodOn(TagController.class)
+                                            .tagById(tag.getId()))
+                                    .withRel(TAG )
+                                    .withName(tag.getName()))
                             );
-                    try {
-                        certificate.add(
-                                WebMvcLinkBuilder
-                                        .linkTo(WebMvcLinkBuilder
-                                                .methodOn(this.getClass())
-                                                .giftCertificateById(certificate.getContent().getId()))
-                                        .withRel(GIFT_CERTIFICATE)
-                                );
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(NO_METHOD);
-                    }
+                    certificate.add(WebMvcLinkBuilder
+                            .linkTo(WebMvcLinkBuilder
+                                    .methodOn(this.getClass())
+                                    .giftCertificateById(certificate
+                                            .getContent()
+                                            .getId()))
+                            .withRel(GIFT_CERTIFICATE));
                     tagLinks.forEach(certificate::add);
                 });
 
         CollectionModel<EntityModel<GiftCertificateDto>> result =
                 CollectionModel.of(model);
 
-        result.add(WebMvcLinkBuilder.linkTo(
-                WebMvcLinkBuilder
-                        .methodOn(this.getClass())
+        result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
                         .listOfGiftCertificates(paginationFilter,
                                 giftSearchFilter,
-                                bindingResult)
-                )
+                                bindingResult))
                 .slash(String.format(PaginationGiftCertificateLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
@@ -148,34 +142,27 @@ public class GiftCertificateController {
 
     /**
      * Extracts gift certificate by id from bd.
-     * @param id of gift certificate.
+     * @param id - gift certificate's id.
      * @return gift certificate (if exists) on JSON format.
-     * @throws EntityNotFoundException if gift certificate does not exist.
      */
     @GetMapping(value = "/{id}")
-    public EntityModel<GiftCertificateDto> giftCertificateById(@PathVariable("id") Long id) throws NoSuchMethodException {
+    public EntityModel<GiftCertificateDto> giftCertificateById(@PathVariable("id") Long id) {
         GiftCertificateDto giftCertificateDto = giftService.findGiftById(id);
         EntityModel<GiftCertificateDto> model = EntityModel.of(giftCertificateDto);
         List<TagDto> tags = giftCertificateDto.getTags();
-        PaginationFilter paginationFilter = PaginationFilter.builder()
-                .page(0)
-                .items(1)
-                .build();
+        PaginationFilter paginationFilter = PaginationFilter.builder().build();
 
         Link selfLink = WebMvcLinkBuilder
-                .linkTo(
-                        WebMvcLinkBuilder
-                                .methodOn(this.getClass())
-                                .giftCertificateById(id)
-                )
+                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .giftCertificateById(id))
                 .withSelfRel();
+
         Link certificatesLink = WebMvcLinkBuilder
-                .linkTo(
-                        WebMvcLinkBuilder
-                                .methodOn(this.getClass())
-                                .listOfGiftCertificates(new PaginationFilter(),
-                                        new GiftCertificateSearchFilter(), null)
-                )
+                .linkTo(WebMvcLinkBuilder
+                        .methodOn(this.getClass())
+                        .listOfGiftCertificates(new PaginationFilter(),
+                                new GiftCertificateSearchFilter(),
+                                null))
                 .slash(String.format(PaginationGiftCertificateLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
@@ -184,16 +171,10 @@ public class GiftCertificateController {
         model.add(selfLink,certificatesLink);
 
         tags.forEach(tag -> {
-            Link link;
-            try {
-                link = WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder
-                                .methodOn(TagController.class).tagById(tag.getId()))
-                        .withRel(TAG )
-                        .withName(tag.getName());
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(NO_METHOD);
-            }
+            Link link = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+                            .methodOn(TagController.class).tagById(tag.getId()))
+                    .withRel(TAG )
+                    .withName(tag.getName());
             model.add(link);
         });
 
@@ -202,16 +183,17 @@ public class GiftCertificateController {
 
     /**
      * Creating gift certificate on bd.
-     * @param dto gift certificate, which we want create on bd.
+     * @param dto - gift certificate, which we want create on bd.
+     * @param bindingResult - needs for catch problems with validating.
      * @return created gift certificate on JSON format.
-     * @throws EntityBadInputException if one of params is incorrect.
      */
     @PostMapping
     public ResponseEntity<GiftCertificateDto> create(@Valid @RequestBody GiftCertificateDto dto,
-                                                     BindingResult error) {
-        if (error.hasErrors()) {
-            throw new EntityBadInputException(error.getFieldError().getDefaultMessage());
+                                                     BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
+
         return new ResponseEntity<>(giftService.create(dto), HttpStatus.CREATED);
     }
 
@@ -220,12 +202,12 @@ public class GiftCertificateController {
      * @param id of gift certificate.
      * @param dto params of gift certificate which we want to update.
      * @return updated gift certificate on JSON format.
-     * @throws EntityNotFoundException if gift certificate does not exist.
      */
     @PatchMapping("/{id}")
     public ResponseEntity<GiftCertificateDto> update(@PathVariable("id") Long id,
                                                      @RequestBody GiftCertificateDto dto ) {
         dto.setId(id);
+
         return new ResponseEntity<>(giftService.update(dto), HttpStatus.OK);
     }
 
@@ -233,7 +215,6 @@ public class GiftCertificateController {
      * Deleting gift certificate from bd.
      * @param id of gift certificate.
      * @return result of deleting on JSON format.
-     * @throws EntityNotFoundException if gift certificate does not exist.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable("id") Long id) {

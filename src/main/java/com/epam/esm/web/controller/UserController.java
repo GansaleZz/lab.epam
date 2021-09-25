@@ -41,34 +41,35 @@ public class UserController {
         this.paginationUserLink = paginationEntityLink;
     }
 
+    /**
+     * Extracts all users from bd.
+     * @param paginationFilter - object which contains information about page's number
+     *                         and number of items for paging.
+     * @param bindingResult - need for catch problems with validating.
+     * @return list of users on JSON format.
+     */
     @GetMapping()
     public CollectionModel<EntityModel<UserDto>> listOfUsers(@Valid PaginationFilter paginationFilter,
-                                                             BindingResult bindingResult)
-            throws NoSuchMethodException {
+                                                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
 
-        Method listOfUsers = this.getClass().getMethod(LIST_OF_USERS,
-                PaginationFilter.class,
-                BindingResult.class);
         List<UserDto> users = userService.findAllUsers(paginationFilter);
         List<EntityModel<UserDto>> model = users.stream()
                 .map(EntityModel::of).collect(Collectors.toList());
+        Method listOfUsers ;
+        try {
+            listOfUsers = this.getClass().getMethod(LIST_OF_USERS,
+                    PaginationFilter.class,
+                    BindingResult.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(NO_METHOD);
+        }
 
-        model.forEach(
-                user -> {
-                    try {
-                        user.add(WebMvcLinkBuilder
-                                .linkTo(WebMvcLinkBuilder
-                                        .methodOn(this.getClass())
-                                        .userById(user.getContent().getId()))
-                                .withRel(USER));
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(NO_METHOD);
-                    }
-                }
-        );
+        model.forEach(user -> user.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                        .userById(user.getContent().getId()))
+                .withRel(USER)));
 
         CollectionModel<EntityModel<UserDto>> result = CollectionModel.of(model);
 
@@ -79,6 +80,7 @@ public class UserController {
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
                 .withSelfRel());
+
         if (paginationFilter.getItems() != 0) {
             paginationUserLink.nextLink(listOfUsers, paginationFilter, bindingResult)
                     .ifPresent(result::add);
@@ -89,38 +91,35 @@ public class UserController {
             paginationUserLink.lastLink(listOfUsers, paginationFilter, bindingResult)
                     .ifPresent(result::add);
         }
+
         return result;
     }
 
+    /**
+     * Extracts user by id from bd.
+     * @param id - user's id.
+     * @return found user on JSON format.
+     */
     @GetMapping("/{id}")
-    public EntityModel<UserDto> userById(@PathVariable("id") Long id)
-            throws NoSuchMethodException {
+    public EntityModel<UserDto> userById(@PathVariable("id") Long id) {
         UserDto userDto = userService.findUserById(id);
         EntityModel<UserDto> model = EntityModel.of(userDto);
-        PaginationFilter paginationFilter = PaginationFilter.builder()
-                .page(0)
-                .items(1)
-                .build();
-
-        Method listOfUsers = this.getClass().getMethod(LIST_OF_USERS,
-                PaginationFilter.class,
-                BindingResult.class);
+        PaginationFilter paginationFilter = PaginationFilter.builder().build();
 
         Link selfRel = WebMvcLinkBuilder.linkTo(this.getClass())
                 .slash(id)
                 .withSelfRel();
 
-        Link usersRel = WebMvcLinkBuilder.linkTo(listOfUsers,
-                        paginationFilter,
-                        null)
+        Link usersRel = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
+                        .methodOn(this.getClass())
+                        .listOfUsers(paginationFilter,
+                                null))
                 .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
                         paginationFilter.getPage(),
                         paginationFilter.getItems()))
                 .withRel(USERS);
 
-        model.add(WebMvcLinkBuilder
-                .linkTo(WebMvcLinkBuilder
-                                .methodOn(OrderController.class)
+        model.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(OrderController.class)
                         .listOfUserOrders(paginationFilter, id, null))
                 .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
                         paginationFilter.getPage(),

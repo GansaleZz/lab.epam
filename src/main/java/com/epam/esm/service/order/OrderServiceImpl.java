@@ -29,7 +29,10 @@ public class OrderServiceImpl implements OrderService{
     private final AbstractEntityMapper<OrderDto, Order> orderMapper;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, UserDao userDao, GiftCertificateDao giftDao, AbstractEntityMapper<OrderDto, Order> orderMapper) {
+    public OrderServiceImpl(OrderDao orderDao,
+                            UserDao userDao,
+                            GiftCertificateDao giftDao,
+                            AbstractEntityMapper<OrderDto, Order> orderMapper) {
         this.orderDao = orderDao;
         this.userDao = userDao;
         this.giftDao = giftDao;
@@ -54,13 +57,13 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public OrderDto create(Long giftId, Long userId) {
-        Optional<GiftCertificate> giftCertificate = giftDao.findEntityById(giftId);
-        Optional<User> user = userDao.findEntityById(userId);
+    public OrderDto create(Long giftCertificateId, Long userId) {
+        Optional<GiftCertificate> giftCertificate = giftDao.findEntityById(giftCertificateId);
+        Optional<User> user = userDao.findUserById(userId);
 
         return orderMapper.toDto(orderDao.create(
                 giftCertificate.orElseThrow(() ->
-                        new EntityNotFoundException(String.format(GIFT_NOT_FOUND, giftId))),
+                        new EntityNotFoundException(String.format(GIFT_NOT_FOUND, giftCertificateId))),
                 user.orElseThrow(() ->
                         new EntityNotFoundException(String.format(USER_NOT_FOUND, userId)))
         ));
