@@ -17,6 +17,10 @@ public class SpecialController {
         this.tagService = tagService;
     }
 
+    /**
+     * Searching the most widely used tag of a user with the highest cost of all orders on db.
+     * @return found tag.
+     */
     @GetMapping("/mostWidelyUsedTag")
     public EntityModel<TagDto> mostWidelyUsedTag() {
         TagDto tagDto = tagService.findMostWidelyUsedTag();
