@@ -24,30 +24,10 @@ import javax.sql.DataSource;
         "com.epam.esm.web.main"
 })
 public class TestConfigJpa {
-    private final JpaVendorAdapter jpaVendorAdapter;
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public TestConfigJpa(ApplicationContext applicationContext, JpaVendorAdapter jpaVendorAdapter) {
+    public TestConfigJpa(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        this.jpaVendorAdapter = jpaVendorAdapter;
     }
-
-    @Bean
-    @Primary
-    public EntityManagerFactory entityManagerFactory(DataSource dataSource) {
-        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(dataSource);
-        emf.setJpaVendorAdapter(jpaVendorAdapter);
-        emf.setPackagesToScan("com.epam.esm");
-        emf.setPersistenceUnitName("default");
-        emf.afterPropertiesSet();
-        return emf.getObject();
-    }
-
-    @Bean
-    public SessionFactory sessionFactory(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.unwrap(SessionFactory.class);
-    }
-
 }

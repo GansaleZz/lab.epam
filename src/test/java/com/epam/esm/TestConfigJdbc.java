@@ -30,21 +30,4 @@ public class TestConfigJdbc {
     public TestConfigJdbc(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
-//
-//    @Bean
-//    public PlatformTransactionManager transactionManager() {
-//        return new DataSourceTransactionManager(getDataSource());
-//    }
-//
-//    @Bean
-//    public EmbeddedDatabase getDataSource(){
-//        return new EmbeddedDatabaseBuilder()
-//                .setType(EmbeddedDatabaseType.H2)
-//                .build();
-//    }
-
-//    @Bean
-//    public JdbcTemplate getJdbcTemplate(){
-//        return new JdbcTemplate(getDataSource());
-//    }
 }
