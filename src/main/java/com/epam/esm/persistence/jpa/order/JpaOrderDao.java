@@ -43,9 +43,7 @@ public class JpaOrderDao implements OrderDao {
     @Override
     public List<Order> findOrdersByUserId(PaginationFilter paginationFilter,
                                           Long userId) {
-        paginationFilter.setCount(entityManager
-                .createQuery(createQueryByParam(USERS_ORDER, userId))
-                .getResultList().size());
+        paginationFilter.setCount(countResult(userId));
 
         return entityManager.createQuery(createQueryByParam(USERS_ORDER, userId))
                 .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
@@ -83,5 +81,15 @@ public class JpaOrderDao implements OrderDao {
         }
 
         return criteriaQuery;
+    }
+
+    private int countResult(Long userId) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
+        Root<Order> root = cq.from(Order.class);
+        cq.select(criteriaBuilder.count(root))
+                .where(criteriaBuilder.equal(root.get(USERS_ORDER), userId));
+
+        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
     }
 }

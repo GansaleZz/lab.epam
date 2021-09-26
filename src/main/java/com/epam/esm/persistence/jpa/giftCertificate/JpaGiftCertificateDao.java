@@ -37,71 +37,74 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
     private static final String TAGS = "tags";
     private static final String CREATE_DATE = "createDate";
 
-   @PersistenceContext
-   private EntityManager entityManager;
-   private final TagDao tagDao;
+    @PersistenceContext
+    private EntityManager entityManager;
+    private final TagDao tagDao;
 
-   @Autowired
-   public JpaGiftCertificateDao(TagDao tagDao) {
+    @Autowired
+    public JpaGiftCertificateDao(TagDao tagDao) {
         this.tagDao = tagDao;
     }
 
-   @Override
-   public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+    @Override
+    public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftCertificateSearchFilter,
                                                         PaginationFilter paginationFilter) {
-       CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-       CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
-               .createQuery(GiftCertificate.class);
-       Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-       criteriaQuery.select(root);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
+                .createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+        criteriaQuery.select(root);
+        List<Predicate> predicates = new ArrayList<>();
 
-       if (giftSearchFilter.getTags().size() != 0) {
-           tagsExists(giftSearchFilter, criteriaQuery, root);
-       }
-       if (giftSearchFilter.getGiftName() != null) {
-           partOfNameExists(giftSearchFilter, criteriaQuery, root);
-       }
-       if (giftSearchFilter.getGiftDescription() != null) {
-           partOfDescriptionExists(giftSearchFilter, criteriaQuery, root);
-       }
-       criteriaQuery.orderBy(orderClause(giftSearchFilter, criteriaBuilder, root));
+        if (giftCertificateSearchFilter.getTags().size() != 0) {
+            predicates.add(tagsExists(giftCertificateSearchFilter, root));
+        }
+        if (giftCertificateSearchFilter.getGiftName() != null) {
+            predicates.add(partOfNameExists(giftCertificateSearchFilter, root));
+        }
+        if (giftCertificateSearchFilter.getGiftDescription() != null) {
+            predicates.add(partOfDescriptionExists(giftCertificateSearchFilter, root));
+        }
+        if (!predicates.isEmpty()) {
+            criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[] {})));
+        }
+        criteriaQuery.orderBy(orderClause(giftCertificateSearchFilter, criteriaBuilder, root));
 
-       paginationFilter.setCount(entityManager.createQuery(criteriaQuery)
-               .getResultList().size());
+        paginationFilter.setCount(countResult(giftCertificateSearchFilter));
 
-       return entityManager.createQuery(criteriaQuery)
-               .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
-               .setMaxResults(paginationFilter.getItems())
-               .getResultList();
-   }
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
+                .setMaxResults(paginationFilter.getItems())
+                .getResultList();
+    }
 
-   @Override
-   public Optional<GiftCertificate> findEntityById(Long id) {
-       CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-       CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
-               .createQuery(GiftCertificate.class);
-       Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
-       criteriaQuery.select(root);
+    @Override
+    public Optional<GiftCertificate> findEntityById(Long id) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder
+                .createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+        criteriaQuery.select(root);
 
-       criteriaQuery.where(criteriaBuilder.equal(root.get(ID), id));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(ID), id));
 
-       return entityManager.createQuery(criteriaQuery)
-               .getResultList()
-               .stream()
-               .findAny();
-   }
+        return entityManager.createQuery(criteriaQuery)
+                .getResultList()
+                .stream()
+                .findAny();
+    }
 
-   @Override
-   @Transactional
-   public GiftCertificate create(GiftCertificate giftCertificate) {
-       giftCertificate.setCreateDate(LocalDateTime.now());
-       giftCertificate.setLastUpdateDate(LocalDateTime.now());
-       giftCertificate.getTags().forEach(tagDao::create);
+    @Override
+    @Transactional
+    public GiftCertificate create(GiftCertificate giftCertificate) {
+        giftCertificate.setCreateDate(LocalDateTime.now());
+        giftCertificate.setLastUpdateDate(LocalDateTime.now());
+        giftCertificate.getTags().forEach(tagDao::create);
 
-       entityManager.persist(giftCertificate);
+        entityManager.persist(giftCertificate);
 
-       return giftCertificate;
-   }
+        return giftCertificate;
+    }
 
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) {
@@ -122,7 +125,7 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
             }
             if (giftCertificate.getTags().size() != 0) {
                 giftCertificate.getTags()
-                        .forEach(tag -> tagDao.create(tag));
+                        .forEach(tagDao::create);
                 gift.getTags().clear();
                 gift.getTags().addAll(giftCertificate.getTags());
             }
@@ -140,47 +143,34 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
         return true;
     }
 
-    private void tagsExists(GiftCertificateSearchFilter giftSearchFilter,
-                            CriteriaQuery<GiftCertificate> criteriaQuery,
-                            Root<GiftCertificate> root) {
+    private Predicate tagsExists(GiftCertificateSearchFilter giftCertificateSearchFilter,
+                                 Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         Join<GiftCertificate, Tag> join = root.join(TAGS, JoinType.LEFT);
         CriteriaBuilder.In<String> in = criteriaBuilder.in(join.get(NAME));
 
-        giftSearchFilter.getTags().forEach(in::value);
-        criteriaQuery.where(in);
+        giftCertificateSearchFilter.getTags().forEach(in::value);
+        return in;
     }
 
-    private void partOfNameExists(GiftCertificateSearchFilter giftSearchFilter,
-                                  CriteriaQuery<GiftCertificate> criteriaQuery,
+    private Predicate partOfNameExists(GiftCertificateSearchFilter giftCertificateSearchFilter,
                                   Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        Predicate predicate = criteriaBuilder.like(
-                root.get(NAME),
-                PERCENT + giftSearchFilter.getGiftName() + PERCENT
-        );
 
-        if (giftSearchFilter.getTags().size() != 0) {
-            criteriaQuery.where(criteriaQuery.getRestriction(), predicate);
-        } else {
-            criteriaQuery.where(predicate);
-        }
+        return criteriaBuilder.like(
+                root.get(NAME),
+                PERCENT + giftCertificateSearchFilter.getGiftName() + PERCENT
+        );
     }
 
-    private void partOfDescriptionExists(GiftCertificateSearchFilter giftSearchFilter,
-                                         CriteriaQuery<GiftCertificate> criteriaQuery,
-                                         Root<GiftCertificate> root) {
+    private Predicate partOfDescriptionExists(GiftCertificateSearchFilter giftCertificateSearchFilter,
+                                              Root<GiftCertificate> root) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        Predicate predicate = criteriaBuilder.like(
-                root.get(DESCRIPTION),
-                PERCENT + giftSearchFilter.getGiftDescription() + PERCENT
-        );
 
-        if (giftSearchFilter.getGiftName() != null) {
-            criteriaQuery.where(criteriaQuery.getRestriction(), predicate);
-        } else {
-            criteriaQuery.where(predicate);
-        }
+        return criteriaBuilder.like(
+                root.get(DESCRIPTION),
+                PERCENT + giftCertificateSearchFilter.getGiftDescription() + PERCENT
+        );
     }
 
     private List<Order> orderClause(GiftCertificateSearchFilter giftSearchFilter,
@@ -205,5 +195,37 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
         }
 
         return orderList;
+    }
+
+    private int countResult(GiftCertificateSearchFilter giftCertificateSearchFilter) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
+        Root<GiftCertificate> root = cq.from(GiftCertificate.class);
+        cq.select(criteriaBuilder.count(root));
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (giftCertificateSearchFilter.getTags().size() != 0) {
+            Join<GiftCertificate, Tag> join = root.join(TAGS, JoinType.LEFT);
+            CriteriaBuilder.In<String> in = criteriaBuilder.in(join.get(NAME));
+
+            giftCertificateSearchFilter.getTags().forEach(in::value);
+            predicates.add(in);
+        }
+        if (giftCertificateSearchFilter.getGiftName() != null) {
+            predicates.add(criteriaBuilder.like(
+                    root.get(NAME),
+                    PERCENT + giftCertificateSearchFilter.getGiftName() + PERCENT
+            ));
+        }
+        if (giftCertificateSearchFilter.getGiftDescription() != null) {
+            predicates.add(criteriaBuilder.like(
+                    root.get(DESCRIPTION),
+                    PERCENT + giftCertificateSearchFilter.getGiftDescription() + PERCENT
+            ));
+        }
+
+        cq.where(criteriaBuilder.and(predicates.toArray(new Predicate[] {})));
+
+        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
     }
 }

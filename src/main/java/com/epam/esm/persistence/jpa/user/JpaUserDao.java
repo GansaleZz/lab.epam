@@ -34,7 +34,8 @@ public class JpaUserDao implements UserDao {
         Root<User> root = criteriaQuery.from(User.class);
         criteriaQuery.select(root);
 
-        paginationFilter.setCount(entityManager.createQuery(criteriaQuery).getResultList().size());
+        paginationFilter.setCount(countResult());
+
         return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
                 .setMaxResults(paginationFilter.getItems())
@@ -63,7 +64,7 @@ public class JpaUserDao implements UserDao {
         Root<Order> root = criteriaQuery.from(Order.class);
         Join<Order, User> join = root.join(USERS_ORDER, JoinType.LEFT);
 
-        criteriaQuery.multiselect( join.get(USER_ID),
+        criteriaQuery.multiselect(join.get(USER_ID),
                 criteriaBuilder.sum(root.get(COST)))
             .groupBy(join.get(USER_ID))
             .orderBy(criteriaBuilder.desc(criteriaBuilder.sum(root.get(COST))));
@@ -75,5 +76,14 @@ public class JpaUserDao implements UserDao {
                 .get())
                 .findAny()
                 .get();
+    }
+
+    private int countResult() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
+        Root<User> root = cq.from(User.class);
+        cq.select(criteriaBuilder.count(root));
+
+        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
     }
 }

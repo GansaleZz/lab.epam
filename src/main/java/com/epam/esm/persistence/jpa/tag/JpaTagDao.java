@@ -36,9 +36,7 @@ public class JpaTagDao implements TagDao {
 
     @Override
     public List<Tag> findAllTags(PaginationFilter paginationFilter) {
-        paginationFilter.setCount(entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
-                .getResultList()
-                .size());
+        paginationFilter.setCount(countResult());
 
         return entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
                 .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
@@ -118,5 +116,14 @@ public class JpaTagDao implements TagDao {
                     attributeValue));
         }
         return criteriaQuery;
+    }
+
+    private int countResult() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
+        Root<Tag> root = cq.from(Tag.class);
+        cq.select(criteriaBuilder.count(root));
+
+        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
     }
 }
