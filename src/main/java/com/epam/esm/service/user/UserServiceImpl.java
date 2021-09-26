@@ -34,10 +34,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto findUserById(Long id) {
-        return userDao.findUserById(id)
+    public UserDto findUserById(Long userId) {
+        return userDao.findUserById(userId)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
-                        id)));
+                        userId)));
     }
 }

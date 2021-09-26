@@ -5,7 +5,6 @@ import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.giftCertificate.GiftCertificateService;
 import com.epam.esm.web.util.exception.EntityBadInputException;
-import com.epam.esm.web.util.exception.EntityNotFoundException;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import com.epam.esm.web.util.pagination.link.PaginationGiftCertificateLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +66,7 @@ public class GiftCertificateController {
             throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
         }
 
-        List<GiftCertificateDto> certificates = giftService.findAllGifts(giftSearchFilter, paginationFilter);
+        List<GiftCertificateDto> certificates = giftService.findAllGiftCertificates(giftSearchFilter, paginationFilter);
         List<EntityModel<GiftCertificateDto>> model = certificates.stream()
                 .map(EntityModel::of)
                 .collect(Collectors.toList());
@@ -147,7 +146,7 @@ public class GiftCertificateController {
      */
     @GetMapping(value = "/{id}")
     public EntityModel<GiftCertificateDto> giftCertificateById(@PathVariable("id") Long id) {
-        GiftCertificateDto giftCertificateDto = giftService.findGiftById(id);
+        GiftCertificateDto giftCertificateDto = giftService.findGiftCertificateById(id);
         EntityModel<GiftCertificateDto> model = EntityModel.of(giftCertificateDto);
         List<TagDto> tags = giftCertificateDto.getTags();
         PaginationFilter paginationFilter = PaginationFilter.builder().build();

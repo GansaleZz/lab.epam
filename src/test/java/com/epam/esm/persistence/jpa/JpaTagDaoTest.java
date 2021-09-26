@@ -1,36 +1,39 @@
-package com.epam.esm.persistence.jdbc;
+package com.epam.esm.persistence.jpa;
 
-import com.epam.esm.TestConfigJdbc;
+import com.epam.esm.TestConfigJpa;
 import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Tag;
-import com.epam.esm.web.util.exception.EntityBadInputException;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { TestConfigJdbc.class }, loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration(classes = { TestConfigJpa.class }, loader = AnnotationConfigContextLoader.class)
 @Sql(scripts = "classpath:sql/db-init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"classpath:sql/db-clean.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-@DataJdbcTest
-class JdbcTemplateTagDaoImplTest {
+@DataJpaTest
+public class JpaTagDaoTest {
 
     @Autowired
-    private TagDao jdbcTagDao;
+    private TagDao jpaTagDao;
+
+    @Autowired
+    private UserDao jpaUserDao;
 
     @Test
     void findAllTags() {
@@ -40,7 +43,7 @@ class JdbcTemplateTagDaoImplTest {
                 .items(paginationItems)
                 .build();
 
-        List<Tag> listResult = jdbcTagDao.findAllTags(paginationFilter);
+        List<Tag> listResult = jpaTagDao.findAllTags(paginationFilter);
 
         assertEquals(sizeAfterInit, listResult.size());
     }
@@ -49,7 +52,7 @@ class JdbcTemplateTagDaoImplTest {
     void findTagByIdExists() {
         Long id = 1L;
 
-        Optional<Tag> tagDao = jdbcTagDao.findEntityById(id);
+        Optional<Tag> tagDao = jpaTagDao.findEntityById(id);
 
         assertTrue(tagDao.isPresent());
         assertEquals(id, tagDao.get().getTagId());
@@ -59,7 +62,16 @@ class JdbcTemplateTagDaoImplTest {
     void findTagByIdFailNotFound() {
         Long badId = 150L;
 
-        assertEquals(Optional.empty(), jdbcTagDao.findEntityById(badId));
+        assertEquals(Optional.empty(), jpaTagDao.findEntityById(badId));
+    }
+
+    @Test
+    void findMostWidelyUsedTag() {
+        String tagName = "TAG_TEST_4";
+
+        Tag tag = jpaTagDao.findMostWidelyUsedTag(jpaUserDao.findUserWithTheHighestOrdersCost());
+
+        assertEquals(tagName, tag.getName());
     }
 
     @Test
@@ -72,17 +84,17 @@ class JdbcTemplateTagDaoImplTest {
                 .items(paginationItems)
                 .build();
 
-        Tag tagDaoResult = jdbcTagDao.create(tagDao);
+        Tag tagDaoResult = jpaTagDao.create(tagDao);
 
-        assertEquals(7, jdbcTagDao.findAllTags(paginationFilter).size());
-        assertTrue(jdbcTagDao.findEntityById(tagDaoResult.getTagId()).isPresent());
+        assertEquals(7, jpaTagDao.findAllTags(paginationFilter).size());
+        assertTrue(jpaTagDao.findEntityById(tagDaoResult.getTagId()).isPresent());
         assertEquals(tagDao.getName(),
-                jdbcTagDao.findEntityById(tagDaoResult.getTagId()).get().getName());
+                jpaTagDao.findEntityById(tagDaoResult.getTagId()).get().getName());
     }
 
     @Test
     void createFailBadInput() {
-      assertThrows(EntityBadInputException.class, () -> jdbcTagDao.create(new Tag()));
+        assertThrows(PersistenceException.class, () -> jpaTagDao.create(new Tag()));
     }
 
     @Test
@@ -92,18 +104,25 @@ class JdbcTemplateTagDaoImplTest {
         PaginationFilter paginationFilter = PaginationFilter.builder()
                 .items(paginationItems)
                 .build();
-        int sizeAfterInit = jdbcTagDao.findAllTags(paginationFilter).size();
+        int sizeAfterInit = jpaTagDao.findAllTags(paginationFilter).size();
 
-        boolean result = jdbcTagDao.delete(id);
+        boolean result = jpaTagDao.delete(id);
 
         assertTrue(result);
-        assertEquals(sizeAfterInit-1, jdbcTagDao.findAllTags(paginationFilter).size());
+        assertEquals(sizeAfterInit-1, jpaTagDao.findAllTags(paginationFilter).size());
     }
 
     @Test
     void deleteFailNotFound() {
         Long id = 1124L;
+        int paginationItems = 1000;
+        PaginationFilter paginationFilter = PaginationFilter.builder()
+                .items(paginationItems)
+                .build();
+        int sizeAfterInit = jpaTagDao.findAllTags(paginationFilter).size();
 
-        assertFalse(jdbcTagDao.delete(id));
+        jpaTagDao.delete(id);
+
+        assertEquals(sizeAfterInit, jpaTagDao.findAllTags(paginationFilter).size());
     }
 }

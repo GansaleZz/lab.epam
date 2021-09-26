@@ -13,29 +13,29 @@ public interface GiftCertificateService {
      * @param giftSearchFilter need for set search parameters.
      * @return list of found gift certificates.
      */
-    List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter,
-                                          PaginationFilter paginationFilter);
+    List<GiftCertificateDto> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                     PaginationFilter paginationFilter);
 
     /**
      * Searching gift certificate on db by id.
-     * @param id unique parameter of gift certificate, by which we can find it.
+     * @param giftCertificateId unique parameter of gift certificate, by which we can find it.
      * @return gift certificate if it exists else throws exception.
      */
-    GiftCertificateDto findGiftById(Long id);
+    GiftCertificateDto findGiftCertificateById(Long giftCertificateId);
 
     /**
      * Creating gift certificate on db.
-     * @param giftCertificateDto - certificate which we want create.
+     * @param giftCertificateDto - certificate which we want to create.
      * @return gift certificate with id which was created.
      */
     GiftCertificateDto create(GiftCertificateDto giftCertificateDto);
 
     /**
      * Deleting gift certificate from db.
-     * @param id of gift certificate which we want to delete from db.
+     * @param giftCertificateId - id of gift certificate which we want to delete from db.
      * @return returns true if gift certificate was deleted, else returns false.
      */
-    boolean delete(Long id);
+    boolean delete(Long giftCertificateId);
 
     /**
      * Updating gift certificate on db.

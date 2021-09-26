@@ -17,8 +17,8 @@ public interface UserService {
 
     /**
      * Searching user on db by id.
-     * @param id - user's id.
+     * @param userId - user's id.
      * @return user if it exists and empty optional if not.
      */
-    UserDto findUserById(Long id);
+    UserDto findUserById(Long userId);
 }

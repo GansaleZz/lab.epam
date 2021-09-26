@@ -29,8 +29,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> findAllGifts(GiftCertificateSearchFilter giftSearchFilter,
-                                                 PaginationFilter paginationFilter) {
+    public List<GiftCertificateDto> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                            PaginationFilter paginationFilter) {
         return giftDao.findAllGiftCertificates(giftSearchFilter, paginationFilter)
                 .stream()
                 .map(giftMapper::toDto)
@@ -38,10 +38,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public GiftCertificateDto findGiftById(Long id) {
-        return giftDao.findEntityById(id)
+    public GiftCertificateDto findGiftCertificateById(Long giftCertificateId) {
+        return giftDao.findEntityById(giftCertificateId)
                 .map(giftMapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificateId)));
     }
 
     @Override
@@ -63,9 +63,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public boolean delete(Long id) {
-        if (!giftDao.delete(id)) {
-            throw new EntityNotFoundException(String.format(NOT_FOUND, id));
+    public boolean delete(Long giftCertificateId) {
+        if (!giftDao.delete(giftCertificateId)) {
+            throw new EntityNotFoundException(String.format(NOT_FOUND, giftCertificateId));
         } else {
             return true;
         }

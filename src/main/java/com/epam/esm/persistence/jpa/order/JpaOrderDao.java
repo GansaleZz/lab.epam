@@ -28,8 +28,8 @@ public class JpaOrderDao implements OrderDao {
     private EntityManager entityManager;
 
     @Override
-    public Optional<Order> findOrderById(Long id, Long userId) {
-        Optional<Order> order = entityManager.createQuery(createQueryByParam(ORDER_ID, id))
+    public Optional<Order> findOrderById(Long orderId, Long userId) {
+        Optional<Order> order = entityManager.createQuery(createQueryByParam(ORDER_ID, orderId))
                 .getResultList()
                 .stream()
                 .findAny();
@@ -42,12 +42,12 @@ public class JpaOrderDao implements OrderDao {
 
     @Override
     public List<Order> findOrdersByUserId(PaginationFilter paginationFilter,
-                                          Long id) {
+                                          Long userId) {
         paginationFilter.setCount(entityManager
-                .createQuery(createQueryByParam(USERS_ORDER, id))
+                .createQuery(createQueryByParam(USERS_ORDER, userId))
                 .getResultList().size());
 
-        return entityManager.createQuery(createQueryByParam(USERS_ORDER, id))
+        return entityManager.createQuery(createQueryByParam(USERS_ORDER, userId))
                 .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
                 .setMaxResults(paginationFilter.getItems())
                 .getResultList();

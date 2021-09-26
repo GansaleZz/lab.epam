@@ -37,11 +37,11 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto findTagById(Long id) {
-         return tagDao.findEntityById(id)
+    public TagDto findTagById(Long tagId) {
+         return tagDao.findEntityById(tagId)
                  .map(tagMapper::toDto)
                  .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
-                         id)));
+                         tagId)));
     }
 
     @Override
@@ -58,9 +58,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean delete(Long id) {
-        if (!tagDao.delete(id)) {
-            throw new EntityNotFoundException(String.format(NOT_FOUND_BY_ID, id));
+    public boolean delete(Long tagId) {
+        if (!tagDao.delete(tagId)) {
+            throw new EntityNotFoundException(String.format(NOT_FOUND_BY_ID, tagId));
         } else {
             return true;
         }

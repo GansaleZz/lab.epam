@@ -15,10 +15,10 @@ public interface TagService {
 
     /**
      * Searching tag on db by id.
-     * @param id unique parameter of tag, by which we can find it.
+     * @param tagId unique parameter of tag, by which we can find it.
      * @return tag if it exists else throws exception.
      */
-    TagDto findTagById(Long id);
+    TagDto findTagById(Long tagId);
 
     /**
      * Searching the most widely used tag of a user with the highest cost of all orders on db.
@@ -35,8 +35,8 @@ public interface TagService {
 
     /**
      * Deleting tag from db.
-     * @param id of tag which we want to delete from db.
+     * @param tagId of tag which we want to delete from db.
      * @return returns true if tag was deleted, else returns false.
      */
-    boolean delete(Long id);
+    boolean delete(Long tagId);
 }

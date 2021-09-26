@@ -1,11 +1,10 @@
 package com.epam.esm.persistence.jpa;
 
 import com.epam.esm.TestConfigJpa;
+import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
-import com.epam.esm.persistence.jpa.giftCertificate.JpaGiftCertificateDao;
 import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
-import com.epam.esm.web.util.exception.EntityBadInputException;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import javax.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class JpaGiftCertificateDaoTest {
 
     @Autowired
-    private JpaGiftCertificateDao jpaGiftCertificateDao;
+    private GiftCertificateDao jpaGiftCertificateDao;
 
     @Test
     public void findAllGiftsCertificatesWithoutSearchFilterParams() {
@@ -255,7 +255,7 @@ public class JpaGiftCertificateDaoTest {
                 .name("Hey Hey")
                 .build();
 
-        assertThrows(EntityBadInputException.class, () -> jpaGiftCertificateDao.create(giftCertificateDao));
+        assertThrows(PersistenceException.class, () -> jpaGiftCertificateDao.create(giftCertificateDao));
     }
 
     @Test

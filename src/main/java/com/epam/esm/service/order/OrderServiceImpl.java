@@ -40,17 +40,17 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public OrderDto findOrderById(Long id, Long userId) {
-        return orderDao.findOrderById(id, userId)
+    public OrderDto findOrderById(Long orderId, Long userId) {
+        return orderDao.findOrderById(orderId, userId)
                 .map(orderMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(ORDER_NOT_FOUND,
-                        id)));
+                        orderId)));
     }
 
     @Override
     public List<OrderDto> findOrdersByUserId(PaginationFilter paginationFilter,
-                                             Long id) {
-        return orderDao.findOrdersByUserId(paginationFilter, id)
+                                             Long userId) {
+        return orderDao.findOrdersByUserId(paginationFilter, userId)
                 .stream()
                 .map(orderMapper::toDto)
                 .collect(Collectors.toList());

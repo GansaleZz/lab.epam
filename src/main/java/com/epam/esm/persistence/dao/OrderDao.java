@@ -14,18 +14,18 @@ public interface OrderDao {
      * Searching all orders of user on db.
      * @param paginationFilter - object which contains information about page's number
      *                         and number of items for paging.
-     * @param id - user's id.
+     * @param userId - user's id.
      * @return list of found orders.
      */
-    List<Order> findOrdersByUserId(PaginationFilter paginationFilter, Long id);
+    List<Order> findOrdersByUserId(PaginationFilter paginationFilter, Long userId);
 
     /**
      * Searching order on db by id.
-     * @param id - order's id.
+     * @param orderId - order's id.
      * @param userId - user's id.
      * @return order if it exists and empty optional if not.
      */
-    Optional<Order> findOrderById(Long id, Long userId);
+    Optional<Order> findOrderById(Long orderId, Long userId);
 
     /**
      * Creating order on db.
