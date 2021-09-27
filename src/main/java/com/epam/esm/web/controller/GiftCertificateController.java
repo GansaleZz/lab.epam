@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class GiftCertificateController {
 
     private static final String NO_METHOD = "Method not found";
-    private static final String BAD_INPUT = "Please enter correct details for ";
     private static final String GIFT_CERTIFICATE = "gift-certificate";
     private static final String GIFT_CERTIFICATES = "gift-certificates";
     private static final String LIST_OF_GIFT_CERTIFICATES = "listOfGiftCertificates";
@@ -63,7 +62,7 @@ public class GiftCertificateController {
                                                                         @Valid GiftCertificateSearchFilter giftSearchFilter,
                                                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         List<GiftCertificateDto> certificates = giftService.findAllGiftCertificates(giftSearchFilter, paginationFilter);
@@ -190,7 +189,7 @@ public class GiftCertificateController {
     public ResponseEntity<GiftCertificateDto> create(@Valid @RequestBody GiftCertificateDto dto,
                                                      BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         return new ResponseEntity<>(giftService.create(dto), HttpStatus.CREATED);

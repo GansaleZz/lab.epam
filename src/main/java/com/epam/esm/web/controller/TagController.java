@@ -33,7 +33,6 @@ public class TagController {
     private static final String TAG = "tag";
     private static final String TAGS = "tags";
     private static final String LIST_OF_TAGS = "listOfTags";
-    private static final String BAD_INPUT = "Please enter correct details for ";
     private static final String NO_METHOD = "Method not found";
     private final TagService tagService;
     private final PaginationEntityLink paginationTagLink;
@@ -55,7 +54,7 @@ public class TagController {
     public CollectionModel<EntityModel<TagDto>> listOfTags(@Valid PaginationFilter paginationFilter,
                                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         List<TagDto> tags = tagService.findAllTags(paginationFilter);
@@ -136,7 +135,7 @@ public class TagController {
     public ResponseEntity<TagDto> create(@Valid @RequestBody TagDto tag,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         return new ResponseEntity<>(tagService.create(tag), HttpStatus.CREATED);

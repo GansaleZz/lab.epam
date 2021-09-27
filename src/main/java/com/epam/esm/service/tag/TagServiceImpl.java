@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private static final String NOT_FOUND_BY_ID = "Requested tag not found (id = %s)";
     private final TagDao tagDao;
     private final UserDao userDao;
     private final AbstractEntityMapper<TagDto, Tag> tagMapper;
@@ -40,8 +39,7 @@ public class TagServiceImpl implements TagService {
     public TagDto findTagById(Long tagId) {
          return tagDao.findEntityById(tagId)
                  .map(tagMapper::toDto)
-                 .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
-                         tagId)));
+                 .orElseThrow(() -> new EntityNotFoundException(tagId.toString()));
     }
 
     @Override
@@ -60,7 +58,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public boolean delete(Long tagId) {
         if (!tagDao.delete(tagId)) {
-            throw new EntityNotFoundException(String.format(NOT_FOUND_BY_ID, tagId));
+            throw new EntityNotFoundException(tagId.toString());
         } else {
             return true;
         }

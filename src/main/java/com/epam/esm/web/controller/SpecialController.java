@@ -2,6 +2,7 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -13,6 +14,7 @@ public class SpecialController {
 
     private final TagService tagService;
 
+    @Autowired
     public SpecialController(TagService tagService) {
         this.tagService = tagService;
     }

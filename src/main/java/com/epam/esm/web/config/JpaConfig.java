@@ -9,9 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.Locale;
 
 @Configuration
 @ComponentScan(basePackages = {
@@ -25,6 +29,8 @@ import javax.sql.DataSource;
 public class JpaConfig {
     private ApplicationContext applicationContext;
     private final JpaVendorAdapter jpaVendorAdapter;
+    private static final String PACKAGES_TO_SCAN = "com.epam.esm";
+    private static final String DEFAULT = "default";
 
     @Autowired
     public JpaConfig(ApplicationContext applicationContext, JpaVendorAdapter jpaVendorAdapter) {
@@ -38,8 +44,8 @@ public class JpaConfig {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
         emf.setJpaVendorAdapter(jpaVendorAdapter);
-        emf.setPackagesToScan("com.epam.esm");
-        emf.setPersistenceUnitName("default");
+        emf.setPackagesToScan(PACKAGES_TO_SCAN);
+        emf.setPersistenceUnitName(DEFAULT);
         emf.afterPropertiesSet();
         return emf.getObject();
     }

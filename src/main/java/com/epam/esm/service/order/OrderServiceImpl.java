@@ -20,9 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService{
 
-    private static final String ORDER_NOT_FOUND = "Requested order not found (id = %s)";
-    private static final String GIFT_NOT_FOUND = "Requested gift not found (id = %s)";
-    private static final String USER_NOT_FOUND = "Requested user not found (id = %s)";
     private final OrderDao orderDao;
     private final UserDao userDao;
     private final GiftCertificateDao giftDao;
@@ -43,8 +40,7 @@ public class OrderServiceImpl implements OrderService{
     public OrderDto findOrderById(Long orderId, Long userId) {
         return orderDao.findOrderById(orderId, userId)
                 .map(orderMapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException(String.format(ORDER_NOT_FOUND,
-                        orderId)));
+                .orElseThrow(() -> new EntityNotFoundException(orderId.toString()));
     }
 
     @Override
@@ -63,9 +59,9 @@ public class OrderServiceImpl implements OrderService{
 
         return orderMapper.toDto(orderDao.create(
                 giftCertificate.orElseThrow(() ->
-                        new EntityNotFoundException(String.format(GIFT_NOT_FOUND, giftCertificateId))),
+                        new EntityNotFoundException(giftCertificateId.toString())),
                 user.orElseThrow(() ->
-                        new EntityNotFoundException(String.format(USER_NOT_FOUND, userId)))
+                        new EntityNotFoundException(userId.toString()))
         ));
     }
 }

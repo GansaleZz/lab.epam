@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private static final String NO_METHOD = "Method not found";
-    private static final String BAD_INPUT = "Please enter correct details for ";
     private static final String LIST_OF_USERS = "listOfUsers";
     private static final String ORDERS = "orders";
     private static final String USERS = "users";
@@ -52,7 +51,7 @@ public class UserController {
     public CollectionModel<EntityModel<UserDto>> listOfUsers(@Valid PaginationFilter paginationFilter,
                                                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         List<UserDto> users = userService.findAllUsers(paginationFilter);

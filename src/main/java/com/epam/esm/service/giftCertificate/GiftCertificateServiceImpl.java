@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
-    private static final String NOT_FOUND = "Requested gift not found (id = %s)";
     private final GiftCertificateDao giftDao;
     private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
 
@@ -41,7 +40,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificateDto findGiftCertificateById(Long giftCertificateId) {
         return giftDao.findEntityById(giftCertificateId)
                 .map(giftMapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificateId)));
+                .orElseThrow(() -> new EntityNotFoundException(giftCertificateId.toString()));
     }
 
     @Override
@@ -55,8 +54,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Transactional
     public GiftCertificateDto update(GiftCertificateDto giftCertificateDto) {
         giftDao.findEntityById(giftCertificateDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND,
-                        giftCertificateDto.getId())));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        giftCertificateDto.getId().toString()));
 
         return giftMapper.toDto(giftDao.update(giftMapper
                 .toEntity(giftCertificateDto)));
@@ -65,7 +64,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public boolean delete(Long giftCertificateId) {
         if (!giftDao.delete(giftCertificateId)) {
-            throw new EntityNotFoundException(String.format(NOT_FOUND, giftCertificateId));
+            throw new EntityNotFoundException(giftCertificateId.toString());
         } else {
             return true;
         }

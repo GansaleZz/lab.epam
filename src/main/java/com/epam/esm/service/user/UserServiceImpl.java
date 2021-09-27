@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService{
 
-    private static final String NOT_FOUND_BY_ID = "Requested user not found (id = %s)";
     private final UserDao userDao;
     private final AbstractEntityMapper<UserDto, User> userMapper;
 
@@ -37,7 +36,6 @@ public class UserServiceImpl implements UserService{
     public UserDto findUserById(Long userId) {
         return userDao.findUserById(userId)
                 .map(userMapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND_BY_ID,
-                        userId)));
+                .orElseThrow(() -> new EntityNotFoundException(userId.toString()));
     }
 }

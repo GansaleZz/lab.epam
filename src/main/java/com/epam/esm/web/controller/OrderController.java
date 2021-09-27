@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/users/{userId}/orders")
 public class OrderController {
 
-    private static final String BAD_INPUT = "Please enter correct details for ";
     private static final String NO_METHOD = "Method not found";
     private static final String ORDER = "order";
     private static final String ORDERS = "orders";
@@ -58,7 +57,7 @@ public class OrderController {
                                                                    @PathVariable("userId") Long userId,
                                                                    BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new EntityBadInputException(BAD_INPUT + bindingResult.getFieldError().getField());
+            throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
         List<OrderDto> orders = orderService.findOrdersByUserId(paginationFilter, userId);
