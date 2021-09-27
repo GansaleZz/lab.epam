@@ -15,6 +15,6 @@ public class TagDto {
 
     private Long id;
 
-    @NotBlank(message = "Name should not be empty")
+    @NotBlank
     private String name;
 }

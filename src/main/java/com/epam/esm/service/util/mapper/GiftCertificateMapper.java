@@ -29,10 +29,12 @@ public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertifica
                 .createDate(giftCertificateDto.getCreateDate())
                 .lastUpdateDate(giftCertificateDto.getLastUpdateDate())
                 .build();
+
         if (giftCertificateDto.getTags() != null) {
             giftCertificateDto.getTags().forEach(tagDto -> giftCertificateDao
                     .getTags().add(tagMapper.toEntity(tagDto)));
         }
+
         return giftCertificateDao;
     }
 
@@ -47,10 +49,12 @@ public class GiftCertificateMapper implements AbstractEntityMapper<GiftCertifica
                  .createDate(giftCertificateDao.getCreateDate())
                  .lastUpdateDate(giftCertificateDao.getLastUpdateDate())
                  .build();
+
          if (giftCertificateDao.getTags() != null ) {
              giftCertificateDao.getTags().forEach(tagDao -> giftCertificateDto
                      .getTags().add(tagMapper.toDto(tagDao)));
          }
+
          return giftCertificateDto;
     }
 }

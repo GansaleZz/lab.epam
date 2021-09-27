@@ -3,11 +3,8 @@ package com.epam.esm.web.main;
 import com.epam.esm.web.config.JpaConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,7 +23,7 @@ public class SpringBootStarter implements WebMvcConfigurer {
     }
 
     @Bean
-    public LocaleResolver localeResolver(){
+    public LocaleResolver localeResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver();
         resolver.setDefaultLocale(Locale.US);
         return resolver;

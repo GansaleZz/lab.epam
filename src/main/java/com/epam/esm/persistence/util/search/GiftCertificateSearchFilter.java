@@ -15,11 +15,11 @@ import java.util.List;
 @Builder
 public class GiftCertificateSearchFilter {
     @Builder.Default
-    @NotNull(message = "GiftsByNameOrder should not be null")
+    @NotNull
     private QueryOrder giftsByNameOrder = QueryOrder.NO;
 
     @Builder.Default
-    @NotNull(message = "GiftsByDateOrder should not be null")
+    @NotNull
     private QueryOrder giftsByDateOrder = QueryOrder.NO;
 
     private String giftName;

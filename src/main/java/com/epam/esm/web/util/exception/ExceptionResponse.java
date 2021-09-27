@@ -2,7 +2,6 @@ package com.epam.esm.web.util.exception;
 
 import lombok.Getter;
 
-
 @Getter
 public class ExceptionResponse {
     private final String message;

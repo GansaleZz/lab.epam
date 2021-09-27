@@ -20,16 +20,16 @@ import java.util.List;
 public class GiftCertificateDto {
     private Long id;
 
-    @NotBlank(message = "Name should not be empty")
+    @NotBlank
     private String name;
 
-    @NotBlank(message = "Description should not be empty")
+    @NotBlank
     private String description;
 
-    @NotNull(message = "Price should not be null")
+    @NotNull
     private BigDecimal price;
 
-    @NotNull(message = "Duration should not be null")
+    @NotNull
     private Duration duration;
 
     private LocalDateTime createDate;

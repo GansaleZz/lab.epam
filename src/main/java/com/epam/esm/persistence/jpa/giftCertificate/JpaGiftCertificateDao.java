@@ -30,7 +30,6 @@ import java.util.Optional;
 public class JpaGiftCertificateDao implements GiftCertificateDao {
 
     private static final String ID = "giftId";
-    private static final String NOT_FOUND = "Requested gift not found";
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String PERCENT = "%";
@@ -131,7 +130,7 @@ public class JpaGiftCertificateDao implements GiftCertificateDao {
             }
             return gift;
         } else {
-            throw new EntityNotFoundException(NOT_FOUND);
+            throw new EntityNotFoundException(giftCertificate.getGiftId().toString());
         }
     }
 

@@ -62,12 +62,8 @@ public class JpaTagDao implements TagDao {
                 .orderBy(criteriaBuilder.desc(criteriaBuilder.count(joinTag.get(NAME))));
 
         return findEntityById((Long) Arrays.stream(entityManager.createQuery(criteriaQuery)
-                .getResultList()
-                .stream()
-                .findAny()
-                .get())
-                .findAny()
-                .get())
+                .getResultList().stream().findAny().get())
+                .findAny().get())
                 .get();
     }
 

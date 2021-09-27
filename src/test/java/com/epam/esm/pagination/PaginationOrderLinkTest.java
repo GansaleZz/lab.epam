@@ -1,7 +1,6 @@
 package com.epam.esm.pagination;
 
 import com.epam.esm.TestConfigJpa;
-import com.epam.esm.web.controller.GiftCertificateController;
 import com.epam.esm.web.controller.OrderController;
 import com.epam.esm.web.util.pagination.PaginationFilter;
 import com.epam.esm.web.util.pagination.link.PaginationOrderLink;

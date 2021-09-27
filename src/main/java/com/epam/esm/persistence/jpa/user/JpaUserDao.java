@@ -70,12 +70,8 @@ public class JpaUserDao implements UserDao {
             .orderBy(criteriaBuilder.desc(criteriaBuilder.sum(root.get(COST))));
 
         return (Long) Arrays.stream(entityManager.createQuery(criteriaQuery)
-                .getResultList()
-                .stream()
-                .findAny()
-                .get())
-                .findAny()
-                .get();
+                .getResultList().stream().findAny().get())
+                .findAny().get();
     }
 
     private int countResult() {

@@ -33,7 +33,6 @@ public class PaginationEntityLinkTest {
                 BindingResult.class);
     }
 
-
     @Test
     void nextLinkExists() {
         String expectedQuery = "page=1&items=1";

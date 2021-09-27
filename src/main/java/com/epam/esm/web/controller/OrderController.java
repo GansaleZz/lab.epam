@@ -105,6 +105,7 @@ public class OrderController {
                             paginationFilter, bindingResult)
                     .ifPresent(result::add);
         }
+
         return result;
     }
 
@@ -116,7 +117,7 @@ public class OrderController {
      */
     @GetMapping("/{id}")
     public EntityModel<OrderDto> orderById(@PathVariable("userId") Long userId,
-                                              @PathVariable("id") Long id) {
+                                           @PathVariable("id") Long id) {
         EntityModel<OrderDto> model = EntityModel.of(orderService.findOrderById(id, userId));
         PaginationFilter paginationFilter = PaginationFilter.builder().build();
 

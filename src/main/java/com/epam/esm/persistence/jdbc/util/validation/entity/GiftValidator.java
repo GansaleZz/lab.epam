@@ -6,6 +6,9 @@ import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
 import com.epam.esm.web.util.exception.EntityBadInputException;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+
 @Component
 public class GiftValidator implements BaseGiftValidator<GiftCertificate, Long> {
 
@@ -16,15 +19,16 @@ public class GiftValidator implements BaseGiftValidator<GiftCertificate, Long> {
     @Override
     public void onBeforeInsert(GiftCertificate giftCertificateDao) throws EntityBadInputException{
         if (giftCertificateDao.getDescription() == null ||
-                giftCertificateDao.getDuration().equals(0) ||
+                giftCertificateDao.getDuration().equals(Duration.ZERO) ||
                 giftCertificateDao.getName() == null ||
-                giftCertificateDao.getPrice().equals(0.0)) {
+                giftCertificateDao.getPrice().equals(BigDecimal.ZERO)) {
             throw new EntityBadInputException(BAD_INPUT_INSERT);
         }
     }
 
     @Override
-    public void onBeforeFindAllEntities(GiftCertificateSearchFilter giftSearchFilter) throws EntityBadInputException {
+    public void onBeforeFindAllEntities(GiftCertificateSearchFilter giftSearchFilter)
+            throws EntityBadInputException {
         if (giftSearchFilter.getGiftsByDateOrder() == null) {
             throw new EntityBadInputException(BAD_INPUT_DATE_ORDER);
         } else {

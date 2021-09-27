@@ -24,7 +24,7 @@ public class ResponseEntityException extends ResponseEntityExceptionHandler {
     private MessageSource messageSource;
 
     @ExceptionHandler(Exception.class)
-    public final ResponseEntity<Object> handleAllExceptions(Exception ex, Locale locale) {
+    public final ResponseEntity<Object> handleAllExceptions(Locale locale) {
         String message = messageSource.getMessage(EXCEPTION_ON_SERVER_SIDE, null, locale);
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(message,

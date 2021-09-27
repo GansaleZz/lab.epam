@@ -30,7 +30,9 @@ public class JdbcTemplateTagDao implements TagDao {
     private final BaseTagValidator<Tag, Long> tagValidation;
 
     @Autowired
-    public JdbcTemplateTagDao(JdbcTemplate jdbcTemplate, BaseTagValidator<Tag, Long> tagValidation, TagMapperDb tagMapper) {
+    public JdbcTemplateTagDao(JdbcTemplate jdbcTemplate,
+                              BaseTagValidator<Tag, Long> tagValidation,
+                              TagMapperDb tagMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.tagValidation = tagValidation;
         this.tagMapper = tagMapper;
