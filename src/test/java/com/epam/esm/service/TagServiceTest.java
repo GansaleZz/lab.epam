@@ -8,7 +8,7 @@ import com.epam.esm.service.tag.TagServiceImpl;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.web.util.exception.EntityBadInputException;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,29 +47,31 @@ public class TagServiceTest {
         Tag tag = Tag.builder().tagId(1L).name("Test").build();
         TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
-
         when(tagMapper.toDto(any())).thenReturn(tagDto);
-        when(tagDao.findAllTags(paginationFilter))
+        when(tagDao.findAllTags(pageFilter))
                 .thenReturn(Collections.singletonList(tag));
 
-        assertEquals(tagDto, tagService.findAllTags(paginationFilter).get(0));
+        List<TagDto> actualList = tagService.findAllTags(pageFilter);
+
+        assertEquals(tagDto, actualList.get(0));
         verify(tagDao, times(1))
-                .findAllTags(paginationFilter);
+                .findAllTags(pageFilter);
     }
 
     @Test
     void findTagByIdExists() {
         TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
         Tag tag = Tag.builder().tagId(1L).name("Test").build();
-
         when(tagMapper.toDto(any())).thenReturn(tagDto);
         when(tagDao.findEntityById(1L))
                 .thenReturn(Optional.of(tag));
 
-        assertEquals(tagDto, tagService.findTagById(1L));
+        TagDto actualTagDto = tagService.findTagById(1L);
+
+        assertEquals(tagDto, actualTagDto);
         verify(tagDao, times(1))
                 .findEntityById(any());
     }
@@ -78,7 +81,8 @@ public class TagServiceTest {
         when(tagDao.findEntityById(2L))
                 .thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> tagService.findTagById(2L));
+        assertThrows(EntityNotFoundException.class,
+                () -> tagService.findTagById(2L));
         verify(tagDao, times(1))
                 .findEntityById(any());
     }
@@ -93,7 +97,6 @@ public class TagServiceTest {
                 .id(1L)
                 .name("Result tag")
                 .build();
-
         when(userDao.findUserWithTheHighestOrdersCost())
                 .thenReturn(1L);
         when(tagDao.findMostWidelyUsedTag(1L))
@@ -101,7 +104,9 @@ public class TagServiceTest {
         when(tagMapper.toDto(any()))
                 .thenReturn(tagDtoResult);
 
-        assertEquals(tagDtoResult, tagService.findMostWidelyUsedTag());
+        TagDto tagDto = tagService.findMostWidelyUsedTag();
+
+        assertEquals(tagDtoResult, tagDto);
         verify(tagDao, times(1))
                 .findMostWidelyUsedTag(any());
         verify(userDao, times(1))
@@ -113,46 +118,39 @@ public class TagServiceTest {
         TagDto tagDto = TagDto.builder().name("Test").build();
         TagDto tagDtoResult = TagDto.builder().id(1L).name("Test").build();
         Tag tagResult = Tag.builder().tagId(1L).name("Test").build();
-
         when(tagMapper.toDto(any())).thenReturn(tagDtoResult);
-        when(tagDao.create(any()))
+        when(tagDao.createEntity(any()))
                 .thenReturn(tagResult);
 
-        assertEquals(tagDtoResult, tagService.create(tagDto));
+        TagDto actualTagDto = tagService.createTag(tagDto);
+
+        assertEquals(tagDtoResult, actualTagDto);
         verify(tagDao, times(1))
-                .create(any());
+                .createEntity(any());
     }
 
     @Test
     void createFailBadInput() {
         TagDto tagDto = TagDto.builder().build();
         Tag tag = Tag.builder().build();
-
         when(tagMapper.toEntity(any())).thenReturn(tag);
-        when(tagDao.create(tag))
+        when(tagDao.createEntity(tag))
                 .thenThrow(EntityBadInputException.class);
 
-        assertThrows(EntityBadInputException.class, () -> tagService.create(tagDto));
+        assertThrows(EntityBadInputException.class, () -> tagService.createTag(tagDto));
         verify(tagDao, times(1))
-                .create(any());
+                .createEntity(any());
 
     }
 
     @Test
     void deleteSuccess() {
-        when(tagDao.delete(1L))
+        when(tagDao.deleteEntity(1L))
                 .thenReturn(true);
 
-        assertTrue(tagService.delete(1L));
-        verify(tagDao, times(1)).delete(1L);
-    }
+        boolean result = tagService.deleteTag(1L);
 
-    @Test
-    void deleteFailNotFound() {
-        when(tagDao.delete(2L))
-                .thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> tagService.delete(2L));
-        verify(tagDao, times(1)).delete(2L);
+        assertTrue(result);
+        verify(tagDao, times(1)).deleteEntity(1L);
     }
 }

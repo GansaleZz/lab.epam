@@ -5,7 +5,7 @@ import com.epam.esm.persistence.entity.User;
 import com.epam.esm.service.dto.UserDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserDto> findAllUsers(PaginationFilter paginationFilter) {
+    public List<UserDto> findAllUsers(PageFilter paginationFilter) {
         return userDao.findAllUsers(paginationFilter)
                 .stream()
                 .map(userMapper::toDto)

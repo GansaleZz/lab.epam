@@ -1,11 +1,12 @@
-package com.epam.esm.persistence.jpa.tag;
+package com.epam.esm.persistence.jpa;
 
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.entity.User;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -34,13 +35,21 @@ public class JpaTagDao implements TagDao {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Override
-    public List<Tag> findAllTags(PaginationFilter paginationFilter) {
-        paginationFilter.setCount(countResult());
+    private final JpaDaoHelper<Tag> jpaDaoHelper;
 
-        return entityManager.createQuery(createQueryByParam(EMPTY_STRING, new Object()))
-                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
-                .setMaxResults(paginationFilter.getItems())
+    @Autowired
+    public JpaTagDao(JpaDaoHelper<Tag> jpaDaoHelper) {
+        this.jpaDaoHelper = jpaDaoHelper;
+    }
+
+    @Override
+    public List<Tag> findAllTags(PageFilter pageFilter) {
+        pageFilter.setCount(countResult());
+
+        return entityManager.createQuery(jpaDaoHelper
+                        .createQueryByParam(EMPTY_STRING, new Object(), Tag.class))
+                .setFirstResult(pageFilter.getPage() * pageFilter.getItems())
+                .setMaxResults(pageFilter.getItems())
                 .getResultList();
     }
 
@@ -69,15 +78,12 @@ public class JpaTagDao implements TagDao {
 
     @Override
     public Optional<Tag> findEntityById(Long id) {
-        return entityManager.createQuery(createQueryByParam(TAG_ID, id))
-                .getResultList()
-                .stream()
-                .findAny();
+        return Optional.ofNullable(entityManager.find(Tag.class, id));
     }
 
     @Override
     @Transactional
-    public Tag create(Tag tag) {
+    public Tag createEntity(Tag tag) {
         Optional<Tag> optionalTag = findTagByName(tag);
         if (optionalTag.isPresent()) {
             return optionalTag.get();
@@ -88,38 +94,25 @@ public class JpaTagDao implements TagDao {
     }
 
     @Override
-    public boolean delete(Long id) {
-        Optional<Tag> optionalTag = findEntityById(id);
-        optionalTag.ifPresent(tag -> entityManager.remove(tag));
+    public boolean deleteEntity(Long id) {
+        findEntityById(id).ifPresent(tag -> entityManager.remove(tag));
         return true;
     }
 
-    private Optional<Tag> findTagByName(Tag tag) {
-        return entityManager.createQuery(createQueryByParam(NAME, tag.getName()))
+    public Optional<Tag> findTagByName(Tag tag) {
+        return entityManager.createQuery(jpaDaoHelper
+                        .createQueryByParam(NAME, tag.getName(), Tag.class))
                 .getResultList()
                 .stream()
                 .findAny();
     }
 
-    private CriteriaQuery<Tag> createQueryByParam(String attributeName,
-                                                  Object attributeValue) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
-        Root<Tag> root = criteriaQuery.from(Tag.class);
-        criteriaQuery.select(root);
-        if (!attributeName.equals(EMPTY_STRING)) {
-            criteriaQuery.where(criteriaBuilder.equal(root.get(attributeName),
-                    attributeValue));
-        }
-        return criteriaQuery;
-    }
-
-    private int countResult() {
+    private long countResult() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
         Root<Tag> root = cq.from(Tag.class);
         cq.select(criteriaBuilder.count(root));
 
-        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
+        return entityManager.createQuery(cq).getSingleResult();
     }
 }

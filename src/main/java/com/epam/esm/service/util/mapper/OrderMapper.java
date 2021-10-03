@@ -22,6 +22,7 @@ public class OrderMapper implements AbstractEntityMapper<OrderDto, Order> {
                 .id(order.getOrderId())
                 .cost(order.getCost())
                 .timestamp(order.getTimestamp())
+                .user(order.getUsersOrder())
                 .build();
     }
 }

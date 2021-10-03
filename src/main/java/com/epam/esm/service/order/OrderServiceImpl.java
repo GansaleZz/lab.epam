@@ -9,7 +9,7 @@ import com.epam.esm.persistence.entity.User;
 import com.epam.esm.service.dto.OrderDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,27 +37,27 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public OrderDto findOrderById(Long orderId, Long userId) {
-        return orderDao.findOrderById(orderId, userId)
+    public OrderDto findOrderById(Long orderId) {
+        return orderDao.findOrderById(orderId)
                 .map(orderMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(orderId.toString()));
     }
 
     @Override
-    public List<OrderDto> findOrdersByUserId(PaginationFilter paginationFilter,
-                                             Long userId) {
-        return orderDao.findOrdersByUserId(paginationFilter, userId)
+    public List<OrderDto> findAllOrdersByUserId(PageFilter paginationFilter,
+                                                Long userId) {
+        return orderDao.findAllOrdersByUserId(paginationFilter, userId)
                 .stream()
                 .map(orderMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public OrderDto create(Long giftCertificateId, Long userId) {
+    public OrderDto createOrder(Long giftCertificateId, Long userId) {
         Optional<GiftCertificate> giftCertificate = giftDao.findEntityById(giftCertificateId);
         Optional<User> user = userDao.findUserById(userId);
 
-        return orderMapper.toDto(orderDao.create(
+        return orderMapper.toDto(orderDao.createOrder(
                 giftCertificate.orElseThrow(() ->
                         new EntityNotFoundException(giftCertificateId.toString())),
                 user.orElseThrow(() ->

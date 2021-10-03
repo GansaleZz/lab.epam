@@ -1,9 +1,9 @@
-package com.epam.esm.persistence.jpa.user;
+package com.epam.esm.persistence.jpa;
 
 import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -28,33 +28,23 @@ public class JpaUserDao implements UserDao {
     private EntityManager entityManager;
 
     @Override
-    public List<User> findAllUsers(PaginationFilter paginationFilter) {
+    public List<User> findAllUsers(PageFilter pageFilter) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
         criteriaQuery.select(root);
 
-        paginationFilter.setCount(countResult());
+        pageFilter.setCount(countResult());
 
         return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(paginationFilter.getPage() * paginationFilter.getItems())
-                .setMaxResults(paginationFilter.getItems())
+                .setFirstResult(pageFilter.getPage() * pageFilter.getItems())
+                .setMaxResults(pageFilter.getItems())
                 .getResultList();
     }
 
     @Override
     public Optional<User> findUserById(Long id) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
-        Root<User> root = criteriaQuery.from(User.class);
-        criteriaQuery.select(root);
-        criteriaQuery.where(criteriaBuilder.and(criteriaBuilder
-                .equal(root.get(USER_ID), id)));
-
-        return entityManager.createQuery(criteriaQuery)
-                .getResultList()
-                .stream()
-                .findAny();
+        return Optional.ofNullable(entityManager.find(User.class, id));
     }
 
     @Override
@@ -74,12 +64,12 @@ public class JpaUserDao implements UserDao {
                 .findAny().get();
     }
 
-    private int countResult() {
+    private long countResult() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
         Root<User> root = cq.from(User.class);
         cq.select(criteriaBuilder.count(root));
 
-        return Math.toIntExact(entityManager.createQuery(cq).getSingleResult());
+        return entityManager.createQuery(cq).getSingleResult();
     }
 }

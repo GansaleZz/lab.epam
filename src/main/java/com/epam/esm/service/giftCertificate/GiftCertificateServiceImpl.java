@@ -6,7 +6,7 @@ import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,56 +17,48 @@ import java.util.stream.Collectors;
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
-    private final GiftCertificateDao giftDao;
-    private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper;
+    private final GiftCertificateDao giftCertificateDao;
+    private final AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftCertificateMapper;
 
     @Autowired
     public GiftCertificateServiceImpl(GiftCertificateDao giftDao,
                                       AbstractEntityMapper<GiftCertificateDto, GiftCertificate> giftMapper) {
-        this.giftDao = giftDao;
-        this.giftMapper = giftMapper;
+        this.giftCertificateDao = giftDao;
+        this.giftCertificateMapper = giftMapper;
     }
 
     @Override
-    public List<GiftCertificateDto> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
-                                                            PaginationFilter paginationFilter) {
-        return giftDao.findAllGiftCertificates(giftSearchFilter, paginationFilter)
+    public List<GiftCertificateDto> findAllGiftCertificates(GiftCertificateSearchFilter giftCertificateSearchFilter,
+                                                            PageFilter paginationFilter) {
+        return giftCertificateDao.findAllGiftCertificates(giftCertificateSearchFilter, paginationFilter)
                 .stream()
-                .map(giftMapper::toDto)
+                .map(giftCertificateMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public GiftCertificateDto findGiftCertificateById(Long giftCertificateId) {
-        return giftDao.findEntityById(giftCertificateId)
-                .map(giftMapper::toDto)
+        return giftCertificateDao.findEntityById(giftCertificateId)
+                .map(giftCertificateMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(giftCertificateId.toString()));
     }
 
     @Override
     @Transactional
-    public GiftCertificateDto create(GiftCertificateDto giftCertificateDto) {
-        return giftMapper.toDto(giftDao
-                .create(giftMapper.toEntity(giftCertificateDto)));
+    public GiftCertificateDto createGiftCertificate(GiftCertificateDto giftCertificateDto) {
+        return giftCertificateMapper.toDto(giftCertificateDao
+                .createEntity(giftCertificateMapper.toEntity(giftCertificateDto)));
     }
 
     @Override
     @Transactional
-    public GiftCertificateDto update(GiftCertificateDto giftCertificateDto) {
-        giftDao.findEntityById(giftCertificateDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        giftCertificateDto.getId().toString()));
-
-        return giftMapper.toDto(giftDao.update(giftMapper
-                .toEntity(giftCertificateDto)));
+    public GiftCertificateDto updateGiftCertificate(GiftCertificateDto giftCertificateDto) {
+        return giftCertificateMapper
+                .toDto(giftCertificateDao.updateGiftCertificate(giftCertificateMapper.toEntity(giftCertificateDto)));
     }
 
     @Override
-    public boolean delete(Long giftCertificateId) {
-        if (!giftDao.delete(giftCertificateId)) {
-            throw new EntityNotFoundException(giftCertificateId.toString());
-        } else {
-            return true;
-        }
+    public boolean deleteGiftCertificate(Long giftCertificateId) {
+        return giftCertificateDao.deleteEntity(giftCertificateId);
     }
 }

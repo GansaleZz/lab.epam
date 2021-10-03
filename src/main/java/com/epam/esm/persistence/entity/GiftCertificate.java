@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,7 +53,7 @@ public class GiftCertificate {
     @Column(name = "last_update_date")
     private LocalDateTime lastUpdateDate;
 
-    @OneToMany(mappedBy = "giftCertificate", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "giftCertificate", cascade = CascadeType.REMOVE)
     @Builder.Default
     @JsonIgnore
     private List<Order> giftOrders = new ArrayList<>();

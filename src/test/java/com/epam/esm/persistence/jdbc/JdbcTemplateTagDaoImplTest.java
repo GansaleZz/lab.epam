@@ -4,7 +4,7 @@ import com.epam.esm.TestConfigJdbc;
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.web.util.exception.EntityBadInputException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ class JdbcTemplateTagDaoImplTest {
     void findAllTags() {
         int sizeAfterInit = 6;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -68,11 +68,11 @@ class JdbcTemplateTagDaoImplTest {
                 .name("Tag__")
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
-        Tag tagDaoResult = jdbcTagDao.create(tagDao);
+        Tag tagDaoResult = jdbcTagDao.createEntity(tagDao);
 
         assertEquals(7, jdbcTagDao.findAllTags(paginationFilter).size());
         assertTrue(jdbcTagDao.findEntityById(tagDaoResult.getTagId()).isPresent());
@@ -82,19 +82,19 @@ class JdbcTemplateTagDaoImplTest {
 
     @Test
     void createFailBadInput() {
-      assertThrows(EntityBadInputException.class, () -> jdbcTagDao.create(new Tag()));
+      assertThrows(EntityBadInputException.class, () -> jdbcTagDao.createEntity(new Tag()));
     }
 
     @Test
     void deleteSuccess() {
         Long id = 1L;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
         int sizeAfterInit = jdbcTagDao.findAllTags(paginationFilter).size();
 
-        boolean result = jdbcTagDao.delete(id);
+        boolean result = jdbcTagDao.deleteEntity(id);
 
         assertTrue(result);
         assertEquals(sizeAfterInit-1, jdbcTagDao.findAllTags(paginationFilter).size());
@@ -104,6 +104,6 @@ class JdbcTemplateTagDaoImplTest {
     void deleteFailNotFound() {
         Long id = 1124L;
 
-        assertFalse(jdbcTagDao.delete(id));
+        assertFalse(jdbcTagDao.deleteEntity(id));
     }
 }

@@ -29,10 +29,10 @@ public class GiftValidator implements BaseGiftValidator<GiftCertificate, Long> {
     @Override
     public void onBeforeFindAllEntities(GiftCertificateSearchFilter giftSearchFilter)
             throws EntityBadInputException {
-        if (giftSearchFilter.getGiftsByDateOrder() == null) {
+        if (giftSearchFilter.getGiftCertificatesByDateOrder() == null) {
             throw new EntityBadInputException(BAD_INPUT_DATE_ORDER);
         } else {
-            if (giftSearchFilter.getGiftsByNameOrder() == null) {
+            if (giftSearchFilter.getGiftCertificatesByNameOrder() == null) {
                 throw new EntityBadInputException(BAD_INPUT_NAME_ORDER);
             }
         }

@@ -6,7 +6,7 @@ import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class JpaGiftCertificateDaoTest {
     public void findAllGiftsCertificatesWithoutSearchFilterParams() {
         int sizeAfterInit = 4;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -59,7 +59,7 @@ public class JpaGiftCertificateDaoTest {
                 .builder()
                 .tags(Collections.singletonList(tagName))
                 .build();
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -77,7 +77,7 @@ public class JpaGiftCertificateDaoTest {
                 .builder()
                 .tags(Collections.singletonList(tagName))
                 .build();
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -91,10 +91,10 @@ public class JpaGiftCertificateDaoTest {
     void findAllGiftCertificatesByNamePartExists() {
         String namePart = "TEST";
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftName(namePart)
+                .giftCertificateName(namePart)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -109,10 +109,10 @@ public class JpaGiftCertificateDaoTest {
     void findAllGiftCertificatesByNamePartNotExists() {
         String namePart = "test";
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftName(namePart)
+                .giftCertificateName(namePart)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -126,10 +126,10 @@ public class JpaGiftCertificateDaoTest {
     void findAllGiftCertificatesByDescriptionPartExists() {
         String descriptionPart = "_3";
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftDescription(descriptionPart)
+                .giftCertificateDescription(descriptionPart)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -143,10 +143,10 @@ public class JpaGiftCertificateDaoTest {
     void findAllGiftCertificatesByNameDescriptionNotExists() {
         String descriptionPart = "_3!!";
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftDescription(descriptionPart)
+                .giftCertificateDescription(descriptionPart)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -159,10 +159,10 @@ public class JpaGiftCertificateDaoTest {
     @Test
     void findAllGiftCertificatesByNameAscOrder() {
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftsByNameOrder(QueryOrder.ASC)
+                .giftCertificatesByNameOrder(QueryOrder.ASC)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -175,10 +175,10 @@ public class JpaGiftCertificateDaoTest {
     @Test
     void findAllGiftCertificatesByDateDescOrder() {
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftsByNameOrder(QueryOrder.DESC)
+                .giftCertificatesByNameOrder(QueryOrder.DESC)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -194,14 +194,14 @@ public class JpaGiftCertificateDaoTest {
         String namePart = "TEST";
         String descriptionPart = "_";
         GiftCertificateSearchFilter giftSearchFilter = GiftCertificateSearchFilter.builder()
-                .giftName(namePart)
+                .giftCertificateName(namePart)
                 .tags(Collections.singletonList(tagName))
-                .giftDescription(descriptionPart)
-                .giftsByNameOrder(QueryOrder.ASC)
-                .giftsByDateOrder(QueryOrder.DESC)
+                .giftCertificateDescription(descriptionPart)
+                .giftCertificatesByNameOrder(QueryOrder.ASC)
+                .giftCertificatesByDateOrder(QueryOrder.DESC)
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -242,7 +242,7 @@ public class JpaGiftCertificateDaoTest {
                 .price(price)
                 .build();
 
-        GiftCertificate giftCertificate = jpaGiftCertificateDao.create(giftCertificateDao);
+        GiftCertificate giftCertificate = jpaGiftCertificateDao.createEntity(giftCertificateDao);
         giftCertificateDao.setCreateDate(giftCertificate.getCreateDate().toLocalDate().atStartOfDay());
         giftCertificateDao.setLastUpdateDate(giftCertificate.getLastUpdateDate().toLocalDate().atStartOfDay());
 
@@ -255,7 +255,7 @@ public class JpaGiftCertificateDaoTest {
                 .name("Hey Hey")
                 .build();
 
-        assertThrows(PersistenceException.class, () -> jpaGiftCertificateDao.create(giftCertificateDao));
+        assertThrows(PersistenceException.class, () -> jpaGiftCertificateDao.createEntity(giftCertificateDao));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class JpaGiftCertificateDaoTest {
                 .name("Updated name for test")
                 .build();
 
-        jpaGiftCertificateDao.update(giftCertificateDao);
+        jpaGiftCertificateDao.updateGiftCertificate(giftCertificateDao);
 
         assertEquals(giftCertificateDao.getName(), jpaGiftCertificateDao
                 .findEntityById(giftCertificateDao.getGiftId())
@@ -280,20 +280,20 @@ public class JpaGiftCertificateDaoTest {
                 .name("Updated name for test")
                 .build();
 
-        assertThrows(EntityNotFoundException.class, () -> jpaGiftCertificateDao.update(giftCertificateDao));
+        assertThrows(EntityNotFoundException.class, () -> jpaGiftCertificateDao.updateGiftCertificate(giftCertificateDao));
     }
 
     @Test
     void deleteSuccess() {
         Long id = 1L;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
         int sizeBefore = jpaGiftCertificateDao
                 .findAllGiftCertificates(new GiftCertificateSearchFilter(), paginationFilter).size();
 
-        boolean res = jpaGiftCertificateDao.delete(id);
+        boolean res = jpaGiftCertificateDao.deleteEntity(id);
 
         assertTrue(res);
         assertEquals(sizeBefore-1, jpaGiftCertificateDao
@@ -304,13 +304,13 @@ public class JpaGiftCertificateDaoTest {
     void deleteFailNotFound() {
         Long id = 15175515L;
         int size = jpaGiftCertificateDao.findAllGiftCertificates(new GiftCertificateSearchFilter(),
-                PaginationFilter.builder()
+                PageFilter.builder()
                         .items(1000)
                         .build()).size();
 
-        jpaGiftCertificateDao.delete(id);
+        jpaGiftCertificateDao.deleteEntity(id);
         int sizeAfterDelete = jpaGiftCertificateDao.findAllGiftCertificates(new GiftCertificateSearchFilter(),
-                PaginationFilter.builder()
+                PageFilter.builder()
                         .items(1000)
                         .build()).size();
 

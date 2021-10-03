@@ -3,8 +3,8 @@ package com.epam.esm.web.controller;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagService;
 import com.epam.esm.web.util.exception.EntityBadInputException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
-import com.epam.esm.web.util.pagination.link.PaginationEntityLink;
+import com.epam.esm.web.util.pagination.PageFilter;
+import com.epam.esm.web.util.pagination.PaginationEntityLinkHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,95 +32,63 @@ public class TagController {
 
     private static final String TAG = "tag";
     private static final String TAGS = "tags";
-    private static final String LIST_OF_TAGS = "listOfTags";
-    private static final String NO_METHOD = "Method not found";
     private final TagService tagService;
-    private final PaginationEntityLink paginationTagLink;
+    private final ControllerHelper<TagDto> controllerHelper;
 
     @Autowired
-    public TagController(TagService tagService, PaginationEntityLink paginationEntityLink) {
+    public TagController(TagService tagService, ControllerHelper<TagDto> controllerHelper) {
         this.tagService = tagService;
-        this.paginationTagLink = paginationEntityLink;
+        this.controllerHelper = controllerHelper;
     }
 
     /**
      * Extracts all tags from bd.
-     * @param paginationFilter - object which contains information about page's number
+     * @param pageFilter object which contains information about page's number
      *                         and number of items for paging.
-     * @param bindingResult - need for catch problems with validating.
+     * @param bindingResult need for catch problems with validating.
      * @return list of tags on JSON format.
      */
     @GetMapping
-    public CollectionModel<EntityModel<TagDto>> listOfTags(@Valid PaginationFilter paginationFilter,
-                                                           BindingResult bindingResult) {
+    public CollectionModel<EntityModel<TagDto>> retrieveAllTags(@Valid PageFilter pageFilter,
+                                                                BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
-        List<TagDto> tags = tagService.findAllTags(paginationFilter);
+        List<TagDto> tags = tagService.findAllTags(pageFilter);
         List<EntityModel<TagDto>> model = tags.stream()
-                .map(EntityModel::of).collect(Collectors.toList());
-        Method listOfTags;
-        try {
-            listOfTags = this.getClass().getMethod(LIST_OF_TAGS,
-                    PaginationFilter.class,
-                    BindingResult.class);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(NO_METHOD);
-        }
+                .map(EntityModel::of)
+                .collect(Collectors.toList());
 
-        model.forEach(tag -> tag.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
-                                .tagById(tag.getContent().getId()))
-                        .withRel(TAG)
-                        .withName(tag.getContent().getName())));
+        model.forEach(tag -> tag.add(getTagByIdLink(tag.getContent().getId())
+                .withName(tag.getContent().getName())
+                .withRel(TAG)));
 
         CollectionModel<EntityModel<TagDto>> result = CollectionModel.of(model);
-        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
-                        .listOfTags(paginationFilter,
-                                bindingResult))
-                .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
-                        paginationFilter.getPage(),
-                        paginationFilter.getItems()))
+
+        Link selfLink = getAllTags(pageFilter, bindingResult)
                 .withSelfRel();
+
         result.add(selfLink);
 
-        if (paginationFilter.getItems() != 0) {
-            paginationTagLink.nextLink(listOfTags, paginationFilter, bindingResult)
-                    .ifPresent(result::add);
-            paginationTagLink.prevLink(listOfTags, paginationFilter, bindingResult)
-                    .ifPresent(result::add);
-            paginationTagLink.firstLink(listOfTags, paginationFilter, bindingResult)
-                    .ifPresent(result::add);
-            paginationTagLink.lastLink(listOfTags, paginationFilter, bindingResult)
-                    .ifPresent(result::add);
-        }
+        controllerHelper.retrievePaginationLinks(pageFilter, selfLink, result);
 
         return result;
     }
 
     /**
      * Extracts tag by id from bd.
-     * @param id - tag's id.
+     * @param id tag's id.
      * @return found tag on JSON format.
      */
     @GetMapping("/{id}")
-    public EntityModel<TagDto> tagById(@PathVariable("id") Long id) {
+    public EntityModel<TagDto> retrieveTagById(@PathVariable("id") Long id) {
         TagDto tag = tagService.findTagById(id);
         EntityModel<TagDto> model = EntityModel.of(tag);
-        PaginationFilter paginationFilter = PaginationFilter.builder().build();
 
-        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
-                        .tagById(id))
-                .withSelfRel();
-
-        Link tagsLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
-                        .listOfTags(paginationFilter,
-                                null))
-                .slash(String.format(PaginationEntityLink.PAGE_ITEMS,
-                        paginationFilter.getPage(),
-                        paginationFilter.getItems()))
-                .withRel(TAGS);
-        model.add(selfLink, tagsLink);
+        model.add(getTagByIdLink(id).withSelfRel());
+        model.add(getAllTags(PageFilter.builder().build(), null)
+                .withRel(TAGS));
 
         return model;
     }
@@ -128,26 +96,47 @@ public class TagController {
     /**
      * Creating tag on bd.
      * @param tag which we want to create on bd.
-     * @param bindingResult - need for catch problems with validating.
+     * @param bindingResult need for catching problems with validating.
      * @return created tag on JSON format.
      */
     @PostMapping
-    public ResponseEntity<TagDto> create(@Valid @RequestBody TagDto tag,
-                                         BindingResult bindingResult) {
+    public ResponseEntity<TagDto> createTag(@Valid @RequestBody TagDto tag,
+                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new EntityBadInputException(bindingResult.getFieldError().getField());
         }
 
-        return new ResponseEntity<>(tagService.create(tag), HttpStatus.CREATED);
+        return new ResponseEntity<>(tagService.createTag(tag), HttpStatus.CREATED);
     }
 
     /**
      * Deleting tag from bd.
-     * @param id - tag's id.
+     * @param id tag's id.
      * @return result of deleting.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(tagService.delete(id), HttpStatus.OK);
+    public ResponseEntity<Boolean> deleteTag(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(tagService.deleteTag(id), HttpStatus.OK);
+    }
+
+    static Link getTagByIdLink(Long tagId) {
+        return Link.of(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder.methodOn(TagController.class)
+                        .retrieveTagById(tagId))
+                .toString());
+    }
+
+    static Link getAllTags(PageFilter pageFilter,
+                           BindingResult bindingResult) {
+
+        Link link = Link.of(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder.methodOn(TagController.class)
+                        .retrieveAllTags(pageFilter, bindingResult))
+                .toString());
+
+        return Link.of(UriComponentsBuilder.fromUri(link.toUri())
+                .queryParams(PaginationEntityLinkHelper.getPagingParameters(pageFilter))
+                .build(true)
+                .toString());
     }
 }

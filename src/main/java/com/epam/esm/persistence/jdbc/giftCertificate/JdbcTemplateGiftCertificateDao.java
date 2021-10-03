@@ -9,13 +9,12 @@ import com.epam.esm.persistence.util.search.QueryOrder;
 import com.epam.esm.persistence.jdbc.util.mapper.GiftMapperDb;
 import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -90,7 +89,7 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
-                                                         PaginationFilter paginationFilter) {
+                                                         PageFilter pageFilter) {
         giftValidation.onBeforeFindAllEntities(giftSearchFilter);
         StringBuilder query = new StringBuilder(SQL_FIND_ALL_GIFTS);
         StringBuilder queryParams = new StringBuilder();
@@ -112,7 +111,7 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
     }
 
     @Override
-    public GiftCertificate create(GiftCertificate giftCertificate) {
+    public GiftCertificate createEntity(GiftCertificate giftCertificate) {
         giftValidation.onBeforeInsert(giftCertificate);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         giftCertificate.setCreateDate(LocalDateTime.now());
@@ -145,7 +144,7 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
 
 
     @Override
-    public GiftCertificate update(GiftCertificate giftCertificate) {
+    public GiftCertificate updateGiftCertificate(GiftCertificate giftCertificate) {
         GiftCertificate giftCertificateUpdated = jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,
                 giftMapper, giftCertificate.getGiftId() ).stream()
                 .findAny()
@@ -186,13 +185,13 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean deleteEntity(Long id) {
         return jdbcTemplate.update(SQL_DELETE_GIFT,id) == 1;
     }
 
     private void checkExistence(Tag tag) {
         if (tag.getTagId() == null && tag.getName() != null) {
-            tag.setTagId(jdbcTemplateTagDao.create(tag).getTagId());
+            tag.setTagId(jdbcTemplateTagDao.createEntity(tag).getTagId());
         }
     }
 
@@ -206,44 +205,44 @@ public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
 
     private void addPartOfName(GiftCertificateSearchFilter giftSearchFilter,
                                StringBuilder queryParams) {
-        if (giftSearchFilter.getGiftName() != null) {
+        if (giftSearchFilter.getGiftCertificateName() != null) {
             if (!queryParams.toString().isEmpty()) {
                 queryParams.append(AND);
             } else {
                 queryParams.append(WHERE);
             }
-            queryParams.append(String.format(SQL_WITH_NAME, giftSearchFilter.getGiftName()));
+            queryParams.append(String.format(SQL_WITH_NAME, giftSearchFilter.getGiftCertificateName()));
         }
     }
 
     private void addPartOfDescription(GiftCertificateSearchFilter giftSearchFilter,
                                       StringBuilder queryParams) {
-        if (giftSearchFilter.getGiftDescription() != null) {
+        if (giftSearchFilter.getGiftCertificateDescription() != null) {
             if (!queryParams.toString().isEmpty()) {
                 queryParams.append(AND);
             } else {
                 queryParams.append(WHERE);
             }
-            queryParams.append(String.format(SQL_WITH_DESCRIPTION, giftSearchFilter.getGiftDescription()));
+            queryParams.append(String.format(SQL_WITH_DESCRIPTION, giftSearchFilter.getGiftCertificateDescription()));
         }
     }
 
     private void addOrderOfSearch(GiftCertificateSearchFilter giftSearchFilter,
                                   StringBuilder orderParams) {
-        if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO ||
-                giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+        if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO ||
+                giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
             orderParams.append(ORDER_BY);
-            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO) {
+            if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO) {
                 orderParams.append(GIFT_CERTIFICATE_NAME)
-                        .append(giftSearchFilter.getGiftsByNameOrder());
+                        .append(giftSearchFilter.getGiftCertificatesByNameOrder());
             }
-            if (giftSearchFilter.getGiftsByNameOrder() != QueryOrder.NO &&
-                    giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+            if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO &&
+                    giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
                 orderParams.append(COMMA);
             }
-            if (giftSearchFilter.getGiftsByDateOrder() != QueryOrder.NO) {
+            if (giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
                 orderParams.append(CREATE_DATE)
-                        .append(giftSearchFilter.getGiftsByDateOrder());
+                        .append(giftSearchFilter.getGiftCertificatesByDateOrder());
             }
         }
     }

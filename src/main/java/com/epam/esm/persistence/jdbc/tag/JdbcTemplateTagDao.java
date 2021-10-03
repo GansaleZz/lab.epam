@@ -4,7 +4,7 @@ import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.persistence.jdbc.util.mapper.TagMapperDb;
 import com.epam.esm.persistence.jdbc.util.validation.BaseTagValidator;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -39,8 +39,14 @@ public class JdbcTemplateTagDao implements TagDao {
     }
 
     @Override
-    public List<Tag> findAllTags(PaginationFilter paginationFilter) {
+    public List<Tag> findAllTags(PageFilter pageFilter) {
         return jdbcTemplate.query(SQL_FIND_ALL_TAGS, tagMapper);
+    }
+
+    @Override
+    public Optional<Tag> findTagByName(Tag tag) {
+        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME,
+                tagMapper, tag.getName()).stream().findAny();
     }
 
     @Override
@@ -55,10 +61,10 @@ public class JdbcTemplateTagDao implements TagDao {
     }
 
     @Override
-    public Tag create(Tag tag) {
+    public Tag createEntity(Tag tag) {
         tagValidation.onBeforeInsert(tag);
-        if (findTagByName(tag.getName()).isPresent()) {
-            return findTagByName(tag.getName()).get();
+        if (findTagByName(tag).isPresent()) {
+            return findTagByName(tag).get();
         } else {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -75,12 +81,7 @@ public class JdbcTemplateTagDao implements TagDao {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean deleteEntity(Long id) {
         return jdbcTemplate.update(SQL_DELETE_TAG,id) == 1;
-    }
-
-    private Optional<Tag> findTagByName(String name) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME,
-                tagMapper, name).stream().findAny();
     }
 }

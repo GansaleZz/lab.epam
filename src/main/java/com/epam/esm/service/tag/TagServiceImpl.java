@@ -6,7 +6,7 @@ import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAllTags(PaginationFilter paginationFilter) {
+    public List<TagDto> findAllTags(PageFilter paginationFilter) {
         return tagDao.findAllTags(paginationFilter)
                 .stream()
                 .map(tagMapper::toDto)
@@ -50,17 +50,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto create(TagDto tagDto) {
+    public TagDto createTag(TagDto tagDto) {
         return tagMapper.toDto(tagDao
-                .create(tagMapper.toEntity(tagDto)));
+                .createEntity(tagMapper.toEntity(tagDto)));
     }
 
     @Override
-    public boolean delete(Long tagId) {
-        if (!tagDao.delete(tagId)) {
-            throw new EntityNotFoundException(tagId.toString());
-        } else {
-            return true;
-        }
+    public boolean deleteTag(Long tagId) {
+        return tagDao.deleteEntity(tagId);
     }
 }

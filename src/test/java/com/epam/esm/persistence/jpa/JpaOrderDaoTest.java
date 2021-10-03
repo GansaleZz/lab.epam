@@ -6,7 +6,7 @@ import com.epam.esm.persistence.dao.OrderDao;
 import com.epam.esm.persistence.entity.GiftCertificate;
 import com.epam.esm.persistence.entity.Order;
 import com.epam.esm.persistence.entity.User;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,9 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { TestConfigJpa.class }, loader = AnnotationConfigContextLoader.class)
@@ -39,11 +41,11 @@ public class JpaOrderDaoTest {
         long userId = 1L;
         int expectedSize = 3;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
-        int actualSize = jpaOrderDao.findOrdersByUserId(paginationFilter, userId).size();
+        int actualSize = jpaOrderDao.findAllOrdersByUserId(paginationFilter, userId).size();
 
         assertEquals(expectedSize, actualSize);
     }
@@ -53,11 +55,11 @@ public class JpaOrderDaoTest {
         long userId = 1123123L;
         int expectedSize = 0;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
-        int actualSize = jpaOrderDao.findOrdersByUserId(paginationFilter, userId).size();
+        int actualSize = jpaOrderDao.findAllOrdersByUserId(paginationFilter, userId).size();
 
         assertEquals(expectedSize, actualSize);
     }
@@ -67,11 +69,11 @@ public class JpaOrderDaoTest {
         long userId = 4L;
         int expectedSize = 0;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
-        int actualSize = jpaOrderDao.findOrdersByUserId(paginationFilter, userId).size();
+        int actualSize = jpaOrderDao.findAllOrdersByUserId(paginationFilter, userId).size();
 
         assertEquals(expectedSize, actualSize);
     }
@@ -79,31 +81,19 @@ public class JpaOrderDaoTest {
     @Test
     void findOrderByIdExists() {
         long orderId = 1;
-        long userId = 1;
         BigDecimal cost = BigDecimal.valueOf(2900.0);
 
-        Optional<Order> order = jpaOrderDao.findOrderById(orderId, userId);
+        Optional<Order> order = jpaOrderDao.findOrderById(orderId);
 
         assertTrue(order.isPresent());
         assertEquals(cost, order.get().getCost());
     }
 
     @Test
-    void findOrderByIdNotFoundUserId() {
-        long orderId = 1;
-        long userId = 1123;
-
-        Optional<Order> order = jpaOrderDao.findOrderById(orderId, userId);
-
-        assertFalse(order.isPresent());
-    }
-
-    @Test
     void findOrderByIdNotFound() {
         long orderId = 1124124;
-        long userId = 1;
 
-        Optional<Order> order = jpaOrderDao.findOrderById(orderId, userId);
+        Optional<Order> order = jpaOrderDao.findOrderById(orderId);
 
         assertFalse(order.isPresent());
     }
@@ -117,7 +107,7 @@ public class JpaOrderDaoTest {
                 jpaGiftCertificate.findEntityById(1L).get();
         BigDecimal expectedCost = giftCertificate.getPrice();
 
-        Order order = jpaOrderDao.create(giftCertificate, user);
+        Order order = jpaOrderDao.createOrder(giftCertificate, user);
 
         assertEquals(expectedCost, order.getCost());
     }
@@ -130,12 +120,12 @@ public class JpaOrderDaoTest {
                 .giftId(4L)
                 .price(BigDecimal.valueOf(4182041824L))
                 .build();
-        BigDecimal expectedCost = jpaOrderDao.findOrderById(orderId, userId)
+        BigDecimal expectedCost = jpaOrderDao.findOrderById(orderId)
                 .get().getCost();
 
-        jpaGiftCertificate.update(giftCertificate);
+        jpaGiftCertificate.updateGiftCertificate(giftCertificate);
         BigDecimal costAfterChangeGiftCertificate = jpaOrderDao
-                .findOrderById(orderId, userId).get().getCost();
+                .findOrderById(orderId).get().getCost();
 
         assertEquals(expectedCost, costAfterChangeGiftCertificate);
     }

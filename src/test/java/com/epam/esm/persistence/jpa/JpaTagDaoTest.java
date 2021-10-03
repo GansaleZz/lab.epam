@@ -4,7 +4,7 @@ import com.epam.esm.TestConfigJpa;
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.dao.UserDao;
 import com.epam.esm.persistence.entity.Tag;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class JpaTagDaoTest {
     void findAllTags() {
         int sizeAfterInit = 6;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
@@ -80,11 +80,11 @@ public class JpaTagDaoTest {
                 .name("Tag__")
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 
-        Tag tagDaoResult = jpaTagDao.create(tagDao);
+        Tag tagDaoResult = jpaTagDao.createEntity(tagDao);
 
         assertEquals(7, jpaTagDao.findAllTags(paginationFilter).size());
         assertTrue(jpaTagDao.findEntityById(tagDaoResult.getTagId()).isPresent());
@@ -94,19 +94,19 @@ public class JpaTagDaoTest {
 
     @Test
     void createFailBadInput() {
-        assertThrows(PersistenceException.class, () -> jpaTagDao.create(new Tag()));
+        assertThrows(PersistenceException.class, () -> jpaTagDao.createEntity(new Tag()));
     }
 
     @Test
     void deleteSuccess() {
         Long id = 1L;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
         int sizeAfterInit = jpaTagDao.findAllTags(paginationFilter).size();
 
-        boolean result = jpaTagDao.delete(id);
+        boolean result = jpaTagDao.deleteEntity(id);
 
         assertTrue(result);
         assertEquals(sizeAfterInit-1, jpaTagDao.findAllTags(paginationFilter).size());
@@ -116,12 +116,12 @@ public class JpaTagDaoTest {
     void deleteFailNotFound() {
         Long id = 1124L;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
         int sizeAfterInit = jpaTagDao.findAllTags(paginationFilter).size();
 
-        jpaTagDao.delete(id);
+        jpaTagDao.deleteEntity(id);
 
         assertEquals(sizeAfterInit, jpaTagDao.findAllTags(paginationFilter).size());
     }

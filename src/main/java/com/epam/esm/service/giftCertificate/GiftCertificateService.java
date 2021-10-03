@@ -2,7 +2,7 @@ package com.epam.esm.service.giftCertificate;
 
 import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
 import com.epam.esm.service.dto.GiftCertificateDto;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface GiftCertificateService {
      * @return list of found gift certificates.
      */
     List<GiftCertificateDto> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
-                                                     PaginationFilter paginationFilter);
+                                                     PageFilter paginationFilter);
 
     /**
      * Searching gift certificate on db by id.
@@ -25,22 +25,22 @@ public interface GiftCertificateService {
 
     /**
      * Creating gift certificate on db.
-     * @param giftCertificateDto - certificate which we want to create.
+     * @param giftCertificateDto certificate which we want to create.
      * @return gift certificate with id which was created.
      */
-    GiftCertificateDto create(GiftCertificateDto giftCertificateDto);
+    GiftCertificateDto createGiftCertificate(GiftCertificateDto giftCertificateDto);
 
     /**
      * Deleting gift certificate from db.
-     * @param giftCertificateId - id of gift certificate which we want to delete from db.
+     * @param giftCertificateId id of gift certificate which we want to delete from db.
      * @return returns true if gift certificate was deleted, else returns false.
      */
-    boolean delete(Long giftCertificateId);
+    boolean deleteGiftCertificate(Long giftCertificateId);
 
     /**
      * Updating gift certificate on db.
      * @param giftCertificateDto which we want update on db.
      * @return gift certificate after update.
      */
-    GiftCertificateDto update(GiftCertificateDto giftCertificateDto);
+    GiftCertificateDto updateGiftCertificate(GiftCertificateDto giftCertificateDto);
 }

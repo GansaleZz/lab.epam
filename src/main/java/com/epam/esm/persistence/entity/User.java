@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,7 +29,7 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @OneToMany(mappedBy = "usersOrder", fetch= FetchType.LAZY)
+    @OneToMany(mappedBy = "usersOrder")
     @Builder.Default
     List<Order> orders = new ArrayList<>();
 }

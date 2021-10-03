@@ -2,7 +2,7 @@ package com.epam.esm.persistence.jpa;
 
 import com.epam.esm.TestConfigJpa;
 import com.epam.esm.persistence.dao.UserDao;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class JpaUserDaoTest {
     void findAllUsers() {
         int size = 4;
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter paginationFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
 

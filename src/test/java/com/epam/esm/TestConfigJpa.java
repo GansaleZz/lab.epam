@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {
-        "com.epam.esm.persistence.jpa.*",
+        "com.epam.esm.persistence.jpa",
         "com.epam.esm.persistence.dao",
         "com.epam.esm.persistence.util.*",
         "com.epam.esm.service.*",

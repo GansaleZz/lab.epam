@@ -8,7 +8,7 @@ import com.epam.esm.web.util.exception.EntityBadInputException;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.service.giftCertificate.GiftCertificateServiceImpl;
 import com.epam.esm.web.util.exception.EntityNotFoundException;
-import com.epam.esm.web.util.pagination.PaginationFilter;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,18 +58,19 @@ public class GiftCertificateServiceTest {
                 .duration(Duration.ofDays(10))
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
-
         when(giftCertificateMapper.toDto(any())).thenReturn(giftCertificateDto);
-        when(giftCertificateDao.findAllGiftCertificates(giftSearchFilter, paginationFilter))
+        when(giftCertificateDao.findAllGiftCertificates(giftSearchFilter, pageFilter))
                 .thenReturn(Collections.singletonList(giftCertificate));
 
-        assertEquals(giftCertificateDto,
-                giftCertificateService.findAllGiftCertificates(giftSearchFilter, paginationFilter).get(0));
+        List<GiftCertificateDto> actualList = giftCertificateService
+                .findAllGiftCertificates(giftSearchFilter, pageFilter);
+
+        assertEquals(giftCertificateDto, actualList.get(0));
         verify(giftCertificateDao, times(1))
-                .findAllGiftCertificates(giftSearchFilter, paginationFilter);
+                .findAllGiftCertificates(giftSearchFilter, pageFilter);
     }
 
     @Test
@@ -77,16 +79,18 @@ public class GiftCertificateServiceTest {
                 .tags(Collections.singletonList("La la la"))
                 .build();
         int paginationItems = 1000;
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .items(paginationItems)
                 .build();
-
-        when(giftCertificateDao.findAllGiftCertificates(giftSearchFilter, paginationFilter))
+        when(giftCertificateDao.findAllGiftCertificates(giftSearchFilter, pageFilter))
                 .thenReturn(new ArrayList<>());
 
-        assertEquals(0, giftCertificateService.findAllGiftCertificates(giftSearchFilter, paginationFilter).size());
+        List<GiftCertificateDto> actualList = giftCertificateService
+                .findAllGiftCertificates(giftSearchFilter, pageFilter);
+
+        assertEquals(0, actualList.size());
         verify(giftCertificateDao, times(1))
-                .findAllGiftCertificates(giftSearchFilter, paginationFilter);
+                .findAllGiftCertificates(giftSearchFilter, pageFilter);
     }
 
 
@@ -104,12 +108,13 @@ public class GiftCertificateServiceTest {
                 .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
-
         when(giftCertificateMapper.toDto(any())).thenReturn(giftCertificateDto);
         when(giftCertificateDao.findEntityById(1L))
                 .thenReturn(Optional.of(giftCertificate));
 
-        assertEquals(giftCertificateDto, giftCertificateService.findGiftCertificateById(1L));
+        GiftCertificateDto actualGiftCertificateDto = giftCertificateService.findGiftCertificateById(1L);
+
+        assertEquals(giftCertificateDto, actualGiftCertificateDto);
         verify(giftCertificateDao,
                 times(1)).findEntityById(1L);
     }
@@ -119,7 +124,8 @@ public class GiftCertificateServiceTest {
         when(giftCertificateDao.findEntityById(124124L))
                 .thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> giftCertificateService.findGiftCertificateById(124124L));
+        assertThrows(EntityNotFoundException.class,
+                () -> giftCertificateService.findGiftCertificateById(124124L));
         verify(giftCertificateDao, times(1)).findEntityById(124124L);
     }
 
@@ -151,17 +157,18 @@ public class GiftCertificateServiceTest {
                 .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
-
         when(giftCertificateMapper.toEntity(any()))
                 .thenReturn(giftCertificate);
         when(giftCertificateMapper.toDto(any()))
                 .thenReturn(giftCertificateDtoResult);
-        when(giftCertificateDao.create(giftCertificate))
+        when(giftCertificateDao.createEntity(giftCertificate))
                 .thenReturn(giftCertificateResult);
 
-        assertEquals(giftCertificateDtoResult, giftCertificateService.create(giftCertificateDto));
+        GiftCertificateDto actualGiftCertificateDto = giftCertificateService.createGiftCertificate(giftCertificateDto);
+
+        assertEquals(giftCertificateDtoResult, actualGiftCertificateDto);
         verify(giftCertificateDao, times(1))
-                .create(giftCertificate);
+                .createEntity(giftCertificate);
     }
 
     @Test
@@ -172,14 +179,14 @@ public class GiftCertificateServiceTest {
         GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
                 .name("Test1")
                 .build();
-
         when(giftCertificateMapper.toEntity(any())).thenReturn(giftCertificate);
-        when(giftCertificateDao.create(giftCertificate))
+        when(giftCertificateDao.createEntity(giftCertificate))
                 .thenThrow(EntityBadInputException.class);
 
-        assertThrows(EntityBadInputException.class, () -> giftCertificateService.create(giftCertificateDto));
+        assertThrows(EntityBadInputException.class,
+                () -> giftCertificateService.createGiftCertificate(giftCertificateDto));
         verify(giftCertificateDao, times(1))
-                .create(any());
+                .createEntity(any());
     }
 
     @Test
@@ -202,57 +209,28 @@ public class GiftCertificateServiceTest {
                 .price(BigDecimal.valueOf(100L))
                 .duration(Duration.ofDays(10))
                 .build();
-
         when(giftCertificateMapper.toEntity(any()))
                 .thenReturn(giftCertificate);
         when(giftCertificateMapper.toDto(any()))
                 .thenReturn(giftCertificateDto);
-        when(giftCertificateDao.update(any()))
+        when(giftCertificateDao.updateGiftCertificate(any()))
                 .thenReturn(giftCertificateResult);
-        when(giftCertificateDao.findEntityById(any()))
-                .thenReturn(Optional.of(giftCertificateResult));
 
-        assertEquals(giftCertificateDto,
-                giftCertificateService.update(giftCertificateDto));
+        GiftCertificateDto actualGiftCertificateDto = giftCertificateService.updateGiftCertificate(giftCertificateDto);
+
+        assertEquals(giftCertificateDto, actualGiftCertificateDto);
         verify(giftCertificateDao,
-                times(1)).update(giftCertificate);
-    }
-
-    @Test
-    void updateFailNotFound() {
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .giftId(123L)
-                .name("Test name")
-                .build();
-        GiftCertificateDto giftCertificateDto = GiftCertificateDto.builder()
-                .id(123L)
-                .name("Test name")
-                .build();
-
-        when(giftCertificateDao.findEntityById(any()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> giftCertificateService.update(giftCertificateDto));
-        verify(giftCertificateDao, times(0))
-                    .update(giftCertificate);
+                times(1)).updateGiftCertificate(any());
     }
 
     @Test
     void deleteSuccess() {
-        when(giftCertificateDao.delete(1L))
+        when(giftCertificateDao.deleteEntity(1L))
                 .thenReturn(true);
 
-        assertTrue(giftCertificateService.delete(1L));
-        verify(giftCertificateDao, times(1)).delete(1L);
-    }
+        boolean result = giftCertificateService.deleteGiftCertificate(1L);
 
-    @Test
-    void deleteFailNotFound() {
-        when(giftCertificateDao.delete(123L))
-                .thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> giftCertificateService.delete(123L));
-        verify(giftCertificateDao, times(1)).delete(123L);
+        assertTrue(result);
+        verify(giftCertificateDao, times(1)).deleteEntity(1L);
     }
 }

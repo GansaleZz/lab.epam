@@ -2,17 +2,16 @@ package com.epam.esm.pagination;
 
 import com.epam.esm.TestConfigJpa;
 import com.epam.esm.web.controller.TagController;
-import com.epam.esm.web.util.pagination.PaginationFilter;
-import com.epam.esm.web.util.pagination.link.PaginationEntityLink;
+import com.epam.esm.web.util.pagination.PageFilter;
+import com.epam.esm.web.util.pagination.PaginationEntityLinkHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.validation.BindingResult;
 
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,124 +23,133 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PaginationEntityLinkTest {
 
     @Autowired
-    private PaginationEntityLink paginationEntityLink;
-    private final Method listOfTags;
-
-    public PaginationEntityLinkTest() throws NoSuchMethodException {
-        listOfTags = TagController.class.getMethod("listOfTags",
-                PaginationFilter.class,
-                BindingResult.class);
-    }
+    private PaginationEntityLinkHelper paginationEntityLink;
 
     @Test
     void nextLinkExists() {
         String expectedQuery = "page=1&items=1";
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .page(0)
                 .items(1)
                 .count(2)
                 .build();
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.nextLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveNextPageLink(pageFilter, link);
 
-        assertTrue(link.isPresent());
-        assertEquals(expectedQuery, link.get().toUri().getQuery());
+        assertTrue(newLink.isPresent());
+        assertEquals(expectedQuery, newLink.get().toUri().getQuery());
     }
 
     @Test
     void nextLinkDoesNotExist() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .page(1123)
                 .items(1)
                 .count(1124)
                 .build();
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.nextLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveNextPageLink(pageFilter, link);
 
-        assertFalse(link.isPresent());
+        assertFalse(newLink.isPresent());
     }
 
     @Test
     void previousLinkExists() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        String expectedQuery = "page=0&items=1";
+        PageFilter pageFilter = PageFilter.builder()
                 .page(1)
                 .items(1)
                 .count(2)
                 .build();
-        String expectedQuery = "page=0&items=1";
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.prevLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrievePreviousPageLink(pageFilter, link);
 
-        assertTrue(link.isPresent());
-        assertEquals(expectedQuery, link.get().toUri().getQuery());
+        assertTrue(newLink.isPresent());
+        assertEquals(expectedQuery, newLink.get().toUri().getQuery());
     }
 
     @Test
     void previousLinkDoesNotExist() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .page(0)
                 .items(1)
                 .count(124)
                 .build();
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.prevLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrievePreviousPageLink(pageFilter, link);
 
-        assertFalse(link.isPresent());
+        assertFalse(newLink.isPresent());
     }
 
     @Test
     void firstLinkExists() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        String expectedQuery = "page=0&items=1";
+        PageFilter pageFilter = PageFilter.builder()
                 .page(140)
                 .items(1)
                 .count(223)
                 .build();
-        String expectedQuery = "page=0&items=1";
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.firstLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveFirstPageLink(pageFilter, link);
 
-        assertTrue(link.isPresent());
-        assertEquals(expectedQuery, link.get().toUri().getQuery());
+        assertTrue(newLink.isPresent());
+        assertEquals(expectedQuery, newLink.get().toUri().getQuery());
     }
 
     @Test
     void firstLinkDoesNotExist() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        PageFilter pageFilter = PageFilter.builder()
                 .page(0)
                 .items(1)
                 .count(223)
                 .build();
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.firstLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveFirstPageLink(pageFilter, link);
 
-        assertFalse(link.isPresent());
+        assertFalse(newLink.isPresent());
     }
 
     @Test
     void lastLinkExists() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        String expectedQuery = "page=222&items=1";
+        PageFilter pageFilter = PageFilter.builder()
                 .page(140)
                 .items(1)
                 .count(223)
                 .build();
-        String expectedQuery = "page=222&items=1";
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.lastLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveLastPageLink(pageFilter, link);
 
-        assertTrue(link.isPresent());
-        assertEquals(expectedQuery, link.get().toUri().getQuery());
+        assertTrue(newLink.isPresent());
+        assertEquals(expectedQuery, newLink.get().toUri().getQuery());
     }
 
     @Test
     void lastLinkDoesNotExist() {
-        PaginationFilter paginationFilter = PaginationFilter.builder()
+        String expectedQuery = "page=222&items=1";
+        PageFilter pageFilter = PageFilter.builder()
                 .page(222)
                 .items(1)
                 .count(223)
                 .build();
+        Link link = allTagsLink(pageFilter).withSelfRel();
 
-        Optional<Link> link = paginationEntityLink.lastLink(listOfTags, paginationFilter, null);
+        Optional<Link> newLink = paginationEntityLink.retrieveLastPageLink(pageFilter, link);
 
-        assertFalse(link.isPresent());
+        assertFalse(newLink.isPresent());
+    }
+
+    private Link allTagsLink(PageFilter pageFilter) {
+        return Link.of(WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder.methodOn(TagController.class)
+                        .retrieveAllTags(pageFilter, null))
+                .toString());
     }
 }

@@ -16,15 +16,15 @@ import java.util.List;
 public class GiftCertificateSearchFilter {
     @Builder.Default
     @NotNull
-    private QueryOrder giftsByNameOrder = QueryOrder.NO;
+    private QueryOrder giftCertificatesByNameOrder = QueryOrder.NO;
 
     @Builder.Default
     @NotNull
-    private QueryOrder giftsByDateOrder = QueryOrder.NO;
+    private QueryOrder giftCertificatesByDateOrder = QueryOrder.NO;
 
-    private String giftName;
+    private String giftCertificateName;
 
-    private String giftDescription;
+    private String giftCertificateDescription;
 
     @Builder.Default
     private List<String> tags = new ArrayList<>();

@@ -12,10 +12,11 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.time.Clock;
 
 @Configuration
 @ComponentScan(basePackages = {
-        "com.epam.esm.persistence.jpa.*",
+        "com.epam.esm.persistence.jpa",
         "com.epam.esm.persistence.dao",
         "com.epam.esm.persistence.util.*",
         "com.epam.esm.service.*",
@@ -49,5 +50,10 @@ public class JpaConfig {
     @Bean
     public SessionFactory sessionFactory(EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.unwrap(SessionFactory.class);
+    }
+
+    @Bean
+    public Clock getClockSystemUTC() {
+        return Clock.systemUTC();
     }
 }
