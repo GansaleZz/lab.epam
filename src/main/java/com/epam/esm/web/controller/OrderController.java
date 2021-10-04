@@ -87,8 +87,10 @@ public class OrderController {
 
         model.add(getOrderByIdLink(id).withSelfRel());
 
-        model.add(getAllUserOrdersLink(PageFilter.builder().build(), null, id)
+        model.add(getAllUserOrdersLink(PageFilter.builder().build(), null,
+                model.getContent().getUser().getUserId())
                 .withRel(ORDERS));
+
         model.add(UserController.getUserByIdLink(model.getContent().getUser().getUserId())
                 .withRel(USER));
 

@@ -136,12 +136,11 @@ public class PaginationEntityLinkHelper {
     }
 
     private int calculateCountOfPages(PageFilter pageFilter) {
-        int countOfPages = -1;
-        long startCount = pageFilter.getCount();
-        do {
-            startCount -= pageFilter.getItems();
-            countOfPages++;
-        } while (startCount > 0);
+        int countOfPages = (int) pageFilter.getCount() / pageFilter.getItems() - 1;
+        if (pageFilter.getCount() % pageFilter.getItems() > 0) {
+            countOfPages ++;
+        }
+
         return countOfPages;
     }
 
