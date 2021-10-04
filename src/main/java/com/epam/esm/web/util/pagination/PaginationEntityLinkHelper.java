@@ -112,7 +112,7 @@ public class PaginationEntityLinkHelper {
     }
 
     private Optional<PageFilter> provideFirstPage(PageFilter pageFilter) {
-        if (pageFilter.getPage() !=0) {
+        if (pageFilter.getPage() >= 0) {
             return Optional.of(PageFilter.builder()
                     .page(0)
                     .items(pageFilter.getItems())
@@ -125,7 +125,7 @@ public class PaginationEntityLinkHelper {
     private Optional<PageFilter> provideLastPage(PageFilter pageFilter) {
         int countOfPages = calculateCountOfPages(pageFilter);
 
-        if (pageFilter.getPage() < countOfPages) {
+        if (pageFilter.getPage() <= countOfPages) {
             return Optional.of(PageFilter.builder()
                     .page(countOfPages)
                     .items(pageFilter.getItems())
