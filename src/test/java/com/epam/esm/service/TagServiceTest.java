@@ -1,27 +1,28 @@
 package com.epam.esm.service;
 
-import com.epam.esm.persistence.dao.Tag;
-import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
+import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.UserDao;
+import com.epam.esm.persistence.entity.Tag;
 import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.tag.TagServiceImpl;
 import com.epam.esm.service.util.mapper.AbstractEntityMapper;
-import com.epam.esm.util.validation.dto.TagDtoValidator;
-import com.epam.esm.web.exception.EntityBadInputException;
-import com.epam.esm.web.exception.EntityNotFoundException;
+import com.epam.esm.web.util.exception.EntityBadInputException;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PageFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,124 +31,126 @@ import static org.mockito.Mockito.when;
 public class TagServiceTest {
 
     @Mock
-    private JdbcTemplateTagDao jdbcTemplateTagDao;
+    private TagDao tagDao;
 
     @Mock
     private AbstractEntityMapper<TagDto, Tag> tagMapper;
 
     @Mock
-    private TagDtoValidator tagValidationDto;
+    private UserDao userDao;
 
     @InjectMocks
     private TagServiceImpl tagService;
 
     @Test
     void findAllTagsTest() {
-        Tag tagDao = Tag.builder().id(1L).name("Test").build();
+        Tag tag = Tag.builder().tagId(1L).name("Test").build();
         TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
-
+        int paginationItems = 1000;
+        PageFilter pageFilter = PageFilter.builder()
+                .items(paginationItems)
+                .build();
         when(tagMapper.toDto(any())).thenReturn(tagDto);
-        when(jdbcTemplateTagDao.findAllEntities())
-                .thenReturn(Arrays.asList(tagDao));
+        when(tagDao.findAllTags(pageFilter))
+                .thenReturn(Collections.singletonList(tag));
 
-        assertEquals(tagDto, tagService.findAllTags().get(0));
-        verify(jdbcTemplateTagDao, times(1))
-                .findAllEntities();
+        List<TagDto> actualList = tagService.findAllTags(pageFilter);
+
+        assertEquals(tagDto, actualList.get(0));
+        verify(tagDao, times(1))
+                .findAllTags(pageFilter);
     }
 
     @Test
     void findTagByIdExists() {
         TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
-        Tag tagDao = Tag.builder().id(1L).name("Test").build();
-
+        Tag tag = Tag.builder().tagId(1L).name("Test").build();
         when(tagMapper.toDto(any())).thenReturn(tagDto);
-        when(jdbcTemplateTagDao.findEntityById(1L))
-                .thenReturn(Optional.of(tagDao));
+        when(tagDao.findEntityById(1L))
+                .thenReturn(Optional.of(tag));
 
-        assertEquals(tagDto, tagService.findTagById(1L));
-        verify(jdbcTemplateTagDao, times(1))
+        TagDto actualTagDto = tagService.findTagById(1L);
+
+        assertEquals(tagDto, actualTagDto);
+        verify(tagDao, times(1))
                 .findEntityById(any());
     }
 
     @Test
     void findTagByIdNotFound() {
-        when(jdbcTemplateTagDao.findEntityById(2L))
+        when(tagDao.findEntityById(2L))
                 .thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> tagService.findTagById(2L));
-        verify(jdbcTemplateTagDao, times(1))
+        assertThrows(EntityNotFoundException.class,
+                () -> tagService.findTagById(2L));
+        verify(tagDao, times(1))
                 .findEntityById(any());
     }
 
     @Test
-    void findTagByNameExists() {
-        TagDto tagDto = TagDto.builder().id(1L).name("Test").build();
-        Tag tagDao = Tag.builder().id(1L).name("Test").build();
+    void findMostWidelyUsedTag() {
+        Tag tag = Tag.builder()
+                .tagId(1L)
+                .name("Result tag")
+                .build();
+        TagDto tagDtoResult = TagDto.builder()
+                .id(1L)
+                .name("Result tag")
+                .build();
+        when(userDao.findUserWithTheHighestOrdersCost())
+                .thenReturn(1L);
+        when(tagDao.findMostWidelyUsedTag(1L))
+                .thenReturn(tag);
+        when(tagMapper.toDto(any()))
+                .thenReturn(tagDtoResult);
 
-        when(tagMapper.toDto(any())).thenReturn(tagDto);
-        when(jdbcTemplateTagDao.findTagByName("Test"))
-                .thenReturn(Optional.of(tagDao));
+        TagDto tagDto = tagService.findMostWidelyUsedTag();
 
-        assertEquals(tagDto, tagService.findTagByName("Test"));
-        verify(jdbcTemplateTagDao, times(1))
-                .findTagByName(anyString());
-    }
-
-    @Test
-    void findTagByNameNotFound() {
-        when(jdbcTemplateTagDao.findTagByName(anyString()))
-                .thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> tagService.findTagByName("Test"));
-        verify(jdbcTemplateTagDao, times(1))
-                .findTagByName(anyString());
+        assertEquals(tagDtoResult, tagDto);
+        verify(tagDao, times(1))
+                .findMostWidelyUsedTag(any());
+        verify(userDao, times(1))
+                .findUserWithTheHighestOrdersCost();
     }
 
     @Test
     void createSuccess() {
         TagDto tagDto = TagDto.builder().name("Test").build();
-        TagDto tagDtoRes = TagDto.builder().id(1L).name("Test").build();
-        Tag tagDaoRes = Tag.builder().id(1L).name("Test").build();
+        TagDto tagDtoResult = TagDto.builder().id(1L).name("Test").build();
+        Tag tagResult = Tag.builder().tagId(1L).name("Test").build();
+        when(tagMapper.toDto(any())).thenReturn(tagDtoResult);
+        when(tagDao.createEntity(any()))
+                .thenReturn(tagResult);
 
-        when(tagMapper.toDto(any())).thenReturn(tagDtoRes);
-        when(jdbcTemplateTagDao.create(any()))
-                .thenReturn(tagDaoRes);
+        TagDto actualTagDto = tagService.createTag(tagDto);
 
-        assertEquals(tagDtoRes, tagService.create(tagDto));
-        verify(jdbcTemplateTagDao, times(1))
-                .create(any());
+        assertEquals(tagDtoResult, actualTagDto);
+        verify(tagDao, times(1))
+                .createEntity(any());
     }
 
     @Test
     void createFailBadInput() {
         TagDto tagDto = TagDto.builder().build();
-        Tag tagDao = Tag.builder().build();
-
-        when(tagMapper.toEntity(any())).thenReturn(tagDao);
-        when(jdbcTemplateTagDao.create(tagDao))
+        Tag tag = Tag.builder().build();
+        when(tagMapper.toEntity(any())).thenReturn(tag);
+        when(tagDao.createEntity(tag))
                 .thenThrow(EntityBadInputException.class);
 
-        assertThrows(EntityBadInputException.class, () -> tagService.create(tagDto));
-        verify(jdbcTemplateTagDao, times(1))
-                .create(any());
+        assertThrows(EntityBadInputException.class, () -> tagService.createTag(tagDto));
+        verify(tagDao, times(1))
+                .createEntity(any());
 
     }
 
     @Test
     void deleteSuccess() {
-        when(jdbcTemplateTagDao.delete(1L))
+        when(tagDao.deleteEntity(1L))
                 .thenReturn(true);
 
-        assertTrue(tagService.delete(1L));
-        verify(jdbcTemplateTagDao, times(1)).delete(1L);
-    }
+        boolean result = tagService.deleteTag(1L);
 
-    @Test
-    void deleteFailNotFound() {
-        when(jdbcTemplateTagDao.delete(2L))
-                .thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class, () -> tagService.delete(2L));
-        verify(jdbcTemplateTagDao, times(1)).delete(2L);
+        assertTrue(result);
+        verify(tagDao, times(1)).deleteEntity(1L);
     }
 }

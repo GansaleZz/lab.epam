@@ -1,0 +1,249 @@
+package com.epam.esm.persistence.jdbc.giftCertificate;
+
+import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.entity.GiftCertificate;
+import com.epam.esm.persistence.entity.Tag;
+import com.epam.esm.persistence.jdbc.tag.JdbcTemplateTagDao;
+import com.epam.esm.persistence.util.search.GiftCertificateSearchFilter;
+import com.epam.esm.persistence.util.search.QueryOrder;
+import com.epam.esm.persistence.jdbc.util.mapper.GiftMapperDb;
+import com.epam.esm.persistence.jdbc.util.validation.BaseGiftValidator;
+import com.epam.esm.web.util.exception.EntityNotFoundException;
+import com.epam.esm.web.util.pagination.PageFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+
+@Repository
+public class JdbcTemplateGiftCertificateDao implements GiftCertificateDao {
+    private static final String SQL_FIND_ALL_GIFTS = "SELECT gift_certificate.gift_id, " +
+            "gift_certificate.name, " +
+            "gift_certificate.description,gift_certificate.price, " +
+            "gift_certificate.duration, gift_certificate.create_date, " +
+            "gift_certificate.last_update_date, gift_tags.gift_id, " +
+            "gift_tags.tag_id, tag.name tag_name FROM gift_certificate " +
+            "LEFT JOIN gift_tags ON gift_tags.gift_id = gift_certificate.gift_id " +
+            "LEFT JOIN tag ON gift_tags.tag_id = tag.tag_id";
+
+    private static final String SQL_WITH_TAG = " tag.name = '%s' ";
+    private static final String SQL_WITH_NAME = " gift_certificate.name LIKE '%%%s%%'";
+    private static final String SQL_WITH_DESCRIPTION = " description LIKE '%%%s%%'";
+
+    private static final String SQL_FIND_GIFT_BY_ID = "SELECT gift_certificate.gift_id, " +
+            "gift_certificate.name, tag.name tag_name, " +
+            "gift_certificate.description,gift_certificate.price, " +
+            "gift_certificate.duration, gift_certificate.create_date, " +
+            "gift_certificate.last_update_date, gift_tags.gift_id, " +
+            "gift_tags.tag_id FROM gift_certificate " +
+            "LEFT JOIN gift_tags ON gift_tags.gift_id = gift_certificate.gift_id " +
+            "LEFT JOIN tag ON gift_tags.tag_id = tag.tag_id " +
+            "WHERE gift_certificate.gift_id = ?";
+
+    private static final String SQL_CREATE_GIFT = "INSERT INTO gift_certificate" +
+            "(name, description, price, duration, create_date, last_update_date) " +
+            "VALUES (?,?,?,?,?,?)";
+
+    private static final String SQL_UPDATE_GIFT = "UPDATE gift_certificate " +
+            "SET name = ?, description = ?, " +
+            "price = ?, duration = ?, last_update_date = ? " +
+            "WHERE gift_id = ?";
+
+    private static final String SQL_DELETE_GIFT = "DELETE FROM gift_certificate WHERE gift_id = ?";
+    private static final String SQL_INSERT_GIFT_TAGS = "INSERT INTO gift_tags(gift_id, tag_id) VALUES (?,?)";
+    private static final String SQL_DELETE_GIFT_TAGS = "DELETE FROM gift_tags WHERE gift_id = ?";
+
+    private static final String WHERE = " WHERE ";
+    private static final String AND = " AND ";
+    private static final String ORDER_BY = " ORDER BY";
+    private static final String GIFT_CERTIFICATE_NAME = " gift_certificate.name ";
+    private static final String COMMA = ", ";
+    private static final String CREATE_DATE = " create_date ";
+    private static final String NOT_FOUND = "Requested gift not found (id = %s)";
+
+    private final GiftMapperDb giftMapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final BaseGiftValidator<GiftCertificate, Long> giftValidation;
+    private final JdbcTemplateTagDao jdbcTemplateTagDao;
+
+    @Autowired
+    public JdbcTemplateGiftCertificateDao(JdbcTemplate jdbcTemplate,
+                                          BaseGiftValidator<GiftCertificate, Long> giftValidation,
+                                          GiftMapperDb giftMapper,
+                                          JdbcTemplateTagDao jdbcTemplateTagDao) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.giftValidation = giftValidation;
+        this.giftMapper = giftMapper;
+        this.jdbcTemplateTagDao = jdbcTemplateTagDao;
+    }
+
+    @Override
+    public List<GiftCertificate> findAllGiftCertificates(GiftCertificateSearchFilter giftSearchFilter,
+                                                         PageFilter pageFilter) {
+        giftValidation.onBeforeFindAllEntities(giftSearchFilter);
+        StringBuilder query = new StringBuilder(SQL_FIND_ALL_GIFTS);
+        StringBuilder queryParams = new StringBuilder();
+        StringBuilder orderParams = new StringBuilder();
+
+        addTag(giftSearchFilter, queryParams);
+        addPartOfName(giftSearchFilter, queryParams);
+        addPartOfDescription(giftSearchFilter, queryParams);
+        addOrderOfSearch(giftSearchFilter, orderParams);
+
+        query.append(queryParams);
+        query.append(orderParams);
+        return jdbcTemplate.query(query.toString(), giftMapper);
+    }
+
+    @Override
+    public Optional<GiftCertificate> findEntityById(Long id) {
+        return jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,giftMapper, id).stream().findAny();
+    }
+
+    @Override
+    public GiftCertificate createEntity(GiftCertificate giftCertificate) {
+        giftValidation.onBeforeInsert(giftCertificate);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        giftCertificate.setCreateDate(LocalDateTime.now());
+        giftCertificate.setLastUpdateDate(LocalDateTime.now());
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement(SQL_CREATE_GIFT, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, giftCertificate.getName());
+            preparedStatement.setString(2, giftCertificate.getDescription());
+            preparedStatement.setBigDecimal(3, giftCertificate.getPrice());
+            preparedStatement.setLong(4, giftCertificate.getDuration().toDays());
+            preparedStatement.setDate(5,
+                    Date.valueOf(giftCertificate.getCreateDate().toLocalDate()));
+            preparedStatement.setDate(6,
+                    Date.valueOf(giftCertificate.getLastUpdateDate().toLocalDate()));
+            return preparedStatement;
+        }, keyHolder);
+
+        giftCertificate.setGiftId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        giftCertificate.getTags()
+                .forEach(i -> {
+                    checkExistence(i);
+                    jdbcTemplate
+                            .update(SQL_INSERT_GIFT_TAGS,giftCertificate.getGiftId(),i.getTagId());
+                });
+
+        return giftCertificate;
+    }
+
+
+    @Override
+    public GiftCertificate updateGiftCertificate(GiftCertificate giftCertificate) {
+        GiftCertificate giftCertificateUpdated = jdbcTemplate.query(SQL_FIND_GIFT_BY_ID,
+                giftMapper, giftCertificate.getGiftId() ).stream()
+                .findAny()
+                .orElseThrow(() -> new EntityNotFoundException(String.format(NOT_FOUND, giftCertificate.getGiftId())));
+
+        if (giftCertificate.getName() != null) {
+            giftCertificateUpdated.setName(giftCertificate.getName());
+        }
+        if (giftCertificate.getDescription() != null) {
+            giftCertificateUpdated.setDescription(giftCertificate.getDescription());
+        }
+        if (giftCertificate.getDuration() != null) {
+            giftCertificateUpdated.setDuration(giftCertificate.getDuration());
+        }
+        if (giftCertificate.getPrice() != null) {
+            giftCertificateUpdated.setPrice(giftCertificate.getPrice());
+        }
+
+        jdbcTemplate.update(SQL_UPDATE_GIFT, giftCertificateUpdated.getName(),
+                giftCertificateUpdated.getDescription(), giftCertificateUpdated.getPrice(),
+                giftCertificateUpdated.getDuration().toDays(),
+                Date.valueOf(LocalDateTime.now().toLocalDate()),
+                giftCertificateUpdated.getGiftId());
+        if (giftCertificate.getTags() != null) {
+            if (!giftCertificate.getTags().isEmpty()) {
+                jdbcTemplate.update(SQL_DELETE_GIFT_TAGS, giftCertificate.getGiftId());
+                giftCertificate.getTags()
+                        .forEach(i -> {
+                            checkExistence(i);
+                            jdbcTemplate.update(SQL_INSERT_GIFT_TAGS,
+                                    giftCertificate.getGiftId(), i.getTagId());
+                        });
+                giftCertificateUpdated.setTags(giftCertificate.getTags());
+            }
+        }
+
+        return giftCertificateUpdated;
+    }
+
+    @Override
+    public boolean deleteEntity(Long id) {
+        return jdbcTemplate.update(SQL_DELETE_GIFT,id) == 1;
+    }
+
+    private void checkExistence(Tag tag) {
+        if (tag.getTagId() == null && tag.getName() != null) {
+            tag.setTagId(jdbcTemplateTagDao.createEntity(tag).getTagId());
+        }
+    }
+
+    private void addTag(GiftCertificateSearchFilter giftSearchFilter,
+                        StringBuilder queryParams) {
+        if (giftSearchFilter.getTags().size() != 0) {
+            queryParams.append(WHERE);
+            queryParams.append(String.format(SQL_WITH_TAG, giftSearchFilter.getTags().get(0)));
+        }
+    }
+
+    private void addPartOfName(GiftCertificateSearchFilter giftSearchFilter,
+                               StringBuilder queryParams) {
+        if (giftSearchFilter.getGiftCertificateName() != null) {
+            if (!queryParams.toString().isEmpty()) {
+                queryParams.append(AND);
+            } else {
+                queryParams.append(WHERE);
+            }
+            queryParams.append(String.format(SQL_WITH_NAME, giftSearchFilter.getGiftCertificateName()));
+        }
+    }
+
+    private void addPartOfDescription(GiftCertificateSearchFilter giftSearchFilter,
+                                      StringBuilder queryParams) {
+        if (giftSearchFilter.getGiftCertificateDescription() != null) {
+            if (!queryParams.toString().isEmpty()) {
+                queryParams.append(AND);
+            } else {
+                queryParams.append(WHERE);
+            }
+            queryParams.append(String.format(SQL_WITH_DESCRIPTION, giftSearchFilter.getGiftCertificateDescription()));
+        }
+    }
+
+    private void addOrderOfSearch(GiftCertificateSearchFilter giftSearchFilter,
+                                  StringBuilder orderParams) {
+        if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO ||
+                giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
+            orderParams.append(ORDER_BY);
+            if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO) {
+                orderParams.append(GIFT_CERTIFICATE_NAME)
+                        .append(giftSearchFilter.getGiftCertificatesByNameOrder());
+            }
+            if (giftSearchFilter.getGiftCertificatesByNameOrder() != QueryOrder.NO &&
+                    giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
+                orderParams.append(COMMA);
+            }
+            if (giftSearchFilter.getGiftCertificatesByDateOrder() != QueryOrder.NO) {
+                orderParams.append(CREATE_DATE)
+                        .append(giftSearchFilter.getGiftCertificatesByDateOrder());
+            }
+        }
+    }
+}
